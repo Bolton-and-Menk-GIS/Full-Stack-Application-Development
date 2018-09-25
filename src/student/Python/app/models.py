@@ -20,7 +20,7 @@ if not os.path.exists(db_path):
 
 # VERY IMPORTANT - our connection string.  SqlAlchemy can work with many different database formats
 # we are using sqlite for demo purposes (using multithreaded to prevent locks)
-brewery_str = 'sqlite:///{}/beer.db?check_same_thread=False'.format(db_path)
+brewery_str = 'sqlite:///{}/beer.db?check_same_thread=False'.format(db_path) 
 
 # get declaritive base context
 Base = declarative_base()
