@@ -59,3 +59,16 @@ typings/
 
 # next.js build output
 .next
+
+# python exclude
+*.pyc
+
+# sqlite db folder
+db/
+
+# uploads and downloads folders
+uploads/
+downloads/
+
+# jetbrains
+.idea/

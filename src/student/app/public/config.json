@@ -1,0 +1,12 @@
+{
+  "map": {
+    "accessToken": "pk.eyJ1IjoiZ2lzLWxpcyIsImEiOiJjam02Zmw2cDAzeGNjM3FsaTd0NmlzYTdvIn0.WCNnv0GbbVy624j8Dejs1A",
+    "mapStyle": "mapbox://styles/mapbox/streets-v10",
+    "center": [
+      -93.37,
+      44.9
+    ],
+    "zoom": 9
+  },
+  "api_base": "http://localhost:5000"
+}

@@ -1,0 +1,7 @@
+{
+	"out_email_address": "gis.lis.demo@gmail.com",
+	"out_email_pw": "gislis2017",
+	"out_email_port": 587,
+	"out_email_host": "smtp.gmail.com",
+	"photo_storage_type": "filesystem"
+}
