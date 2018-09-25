@@ -48,7 +48,7 @@ In the interest of saving time, I have created some boiler plates to start with 
 * `vue.config.js` - main configuration options for webpack and production build
 
 ### Workshop Instructions
-The instructions for going through this workshop are broken into sections for each part.  There is also an associated branch for each part with the exception of part one as the boiler plates are already created in the `master` version of this branch.  To begin, go to [Step 1. Getting Started](https://github.com/Bolton-and-Menk-GIS/Full-Stack-Application-Development/sections/01_Getting_Started.md).
+The instructions for going through this workshop are broken into sections for each part.  There is also an associated branch for each part with the exception of part one as the boiler plates are already created in the `master` version of this branch.  To begin, go to [Step 1. Getting Started](https://github.com/Bolton-and-Menk-GIS/Full-Stack-Application-Development/blob/master/sections/01_Getting_Started.md).
 
 
 
