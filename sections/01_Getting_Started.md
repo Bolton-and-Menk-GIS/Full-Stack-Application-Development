@@ -4,8 +4,8 @@
 1. launch VS Code and open the `student` folder
 2. open the terminal and type the following commands, hitting `enter` after each one:
 
-    `cd app`
-    `npm install`
+	* `cd app`
+	*`npm install`
 
 ##### this will take a while to run, so while this is working please move on to setting up Postman
 
