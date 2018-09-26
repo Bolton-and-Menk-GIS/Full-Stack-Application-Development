@@ -5,7 +5,7 @@
 2. open the terminal and type the following commands, hitting `enter` after each one:
 
 	* `cd app`
-	*`npm install`
+	* `npm install`
 
 ##### this will take a while to run, so while this is working please move on to setting up Postman
 
@@ -85,4 +85,4 @@ Before we start setting up the API methods, we need to should understand the dat
 * `Style` - model for `styles` table (beer style)
 * `User` - model for `users` table (note this extends the [flask_login.UserMixin]() class
 
-We can view this data easier by looking at the actual `beers.db` database in the [DB Browser for SQLite](http://sqlitebrowser.org/) application.
+We can view this data easier by looking at the actual `beers.db` database in the <a href="http://sqlitebrowser.org/" target="_blank">DB Browser for SQLite</a> application.
