@@ -64,7 +64,7 @@ Images of the `Brewery Finder` Demo App can be found below:
 
 **Or create a new beer and upload a photo for it**
 
-#### we will also create a feature rich REST API
+### we will also create a feature rich REST API
 
 ![api test](/sections/images/api_test.PNG)
 
