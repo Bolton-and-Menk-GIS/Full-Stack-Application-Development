@@ -22,41 +22,41 @@ in order to have the best development experience, it is recommended that before 
 ### Demo Application
 Images of the `Brewery Finder` Demo App can be found below:
 
-![map](blob/master/sections/app_images/map_view.PNG)
+![map](/sections/app_images/map_view.PNG)
 Map View showing Brewery Locations
 
-![search](blob/master/sections/app_images/typeahead.PNG)
+![search](/sections/app_images/typeahead.PNG)
 Auto-Complete searches for breweries by name
 
-![brewrey info](blob/master/sections/app_images/brewery_info.PNG)
+![brewrey info](/sections/app_images/brewery_info.PNG)
 Quick overview of Brewery with featured beers
 
-![login](blob/master/sections/app_images/login.PNG)
+![login](/sections/app_images/login.PNG)
 Login Page to authenticate users for extended app functionality
 
-![sign up](blob/master/sections/app_images/sign_up.PNG)
+![sign up](/sections/app_images/sign_up.PNG)
 As well as allowing new users to register
 
 #### extra functionality for authenticated users
 
-![export brewery info](blob/master/sections/app_images/export_data.PNG)
+![export brewery info](/sections/app_images/export_data.PNG)
 Export Tables from the database (with a shapefile option for Breweries)
 
-![edit brewery 1](blob/master/sections/app_images/editable_brewery1.PNG)
+![edit brewery 1](/sections/app_images/editable_brewery1.PNG)
 Add/Edit/Update/Delete Brewery
 
-![edit brewery 2](blob/master/sections/app_images/editable_brewery2.PNG)
+![edit brewery 2](/sections/app_images/editable_brewery2.PNG)
 Also can add/delete featured beers from this screen
 
-![edit beer](blob/master/sections/app_images/editable_beer.PNG)
+![edit beer](/sections/app_images/editable_beer.PNG)
 Edit a featured beer
 
-![create beer](blob/master/sections/app_images/create_beer.PNG)
+![create beer](/sections/app_images/create_beer.PNG)
 Or create a new beer and upload a photo for it
 
 #### we will also create a feature rich REST API
 
-![api test](blob/master/sections/app_images/api_test.PNG)
+![api test](/sections/app_images/api_test.PNG)
 Serve up brewery database tables via REST
 
 ### Folder Structure
