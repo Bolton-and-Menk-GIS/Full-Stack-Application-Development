@@ -70,5 +70,8 @@ db/
 uploads/
 downloads/
 
+# virtualenv
+venv/
+
 # jetbrains
 .idea/
