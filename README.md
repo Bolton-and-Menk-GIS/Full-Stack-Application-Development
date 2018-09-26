@@ -17,7 +17,49 @@ in order to have the best development experience, it is recommended that before 
 * [Fiddler](https://www.telerik.com/fiddler) - web debugging proxy to monitor requests
 * [Postman](https://www.telerik.com/fiddler) - API Development Environment that will be used to test our REST API
 * [DB Browser for Sqlite](http://sqlitebrowser.org/) - convenieintly view/update Sqlite databases
+* it would also be beneficial to have both `pip` and `virtualenv` installed for Python
 
+### Demo Application
+Images of the `Brewery Finder` Demo App can be found below:
+
+![map](blob/master/sections/app_images/map_view.PNG)
+Map View showing Brewery Locations
+
+![search](blob/master/sections/app_images/typeahead.PNG)
+Auto-Complete searches for breweries by name
+
+![brewrey info](blob/master/sections/app_images/brewery_info.PNG)
+Quick overview of Brewery with featured beers
+
+![login](blob/master/sections/app_images/login.PNG)
+Login Page to authenticate users for extended app functionality
+
+![sign up](blob/master/sections/app_images/sign_up.PNG)
+As well as allowing new users to register
+
+#### extra functionality for authenticated users
+
+![export brewery info](blob/master/sections/app_images/export_data.PNG)
+Export Tables from the database (with a shapefile option for Breweries)
+
+![edit brewery 1](blob/master/sections/app_images/editable_brewery1.PNG)
+Add/Edit/Update/Delete Brewery
+
+![edit brewery 2](blob/master/sections/app_images/editable_brewery2.PNG)
+Also can add/delete featured beers from this screen
+
+![edit beer](blob/master/sections/app_images/editable_beer.PNG)
+Edit a featured beer
+
+![create beer](blob/master/sections/app_images/create_beer.PNG)
+Or create a new beer and upload a photo for it
+
+#### we will also create a feature rich REST API
+
+![api test](blob/master/sections/app_images/api_test.PNG)
+Serve up brewery database tables via REST
+
+### Folder Structure
 In the interest of saving time, I have created some boiler plates to start with that have both the core Python Flask service set up as well as the skeleton of our `Brewery Finder` app.  These are located in the [student folder]().  The sections below outline the contents of this folder:
 
 ### `/student/Python/app`  (Python/Flask Code):
@@ -30,8 +72,7 @@ In the interest of saving time, I have created some boiler plates to start with 
 * `utils.py` - contains utility functions essential to the application such as `collect_args()`, etc
 * `database_utils.py` - contains helper function for processing photos for beers
 * `models.py` - contains the schema and table objects for SqlAlchemy
-* `/venv` - python virtualenv for windows
-* `/mac_venv` - python virtualenv for mac
+* `/mac_venv` - python `virtualenv` for mac
 * `/beer_sample` - contains csv's and other sample data used to create the brewery data
     *  `create_db_data.py` - script that creates Sqlite database and loads in all brewery data
 * `create_databases.sh` - shell script that starts `virtualenv` and creates the datbase

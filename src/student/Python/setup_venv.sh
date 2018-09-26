@@ -18,7 +18,7 @@ else
 		echo "found arcgis python 10.6"
         c:/python27/arcgis10.6/scripts/virtualenv --download ./app/venv
     else
-        echo "cannot find python!"
+        read -p "cannot find python, you will need to manually install it before running this script again. press any key to exit..."
         exit
     fi
 fi
@@ -41,8 +41,6 @@ fi
 # activate venv
 source ./app/venv/Scripts/activate
 echo "Activated Virtual Environment, now installing dependencies..."
-#read -p "waiting"
-#exit
 
 # # install all dependencies
 pip install six

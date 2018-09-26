@@ -9,7 +9,7 @@
     <keep-alive>
       <router-view></router-view>
     </keep-alive>
-
+  
   </div>
 </template>
 
@@ -47,7 +47,7 @@
   .theme-banner {
     background-color: forestgreen;
     /*font-weight: bold;*/
-    color: white;
+    color: white; 
   }
 
   .bold {
