@@ -26,7 +26,7 @@ Images of the `Brewery Finder` Demo App can be found below:
 
 **Map View showing Brewery Locations**
 
-![search](/sections/images/app_images/typeahead.PNG)
+![search](/sections/images/app_images/typeahead.png)
 
 **Auto-Complete searches for breweries by name**
 
@@ -44,7 +44,7 @@ Images of the `Brewery Finder` Demo App can be found below:
 
 #### extra functionality for authenticated users
 
-![export brewery info](/sections/images/app_images/export_data.PNG)
+![export brewery info](/sections/images/app_images/export.PNG)
 
 **Export Tables from the database (with a shapefile option for Breweries)**
 
