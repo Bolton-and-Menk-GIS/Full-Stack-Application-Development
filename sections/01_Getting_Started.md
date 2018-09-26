@@ -86,4 +86,5 @@ Before we start setting up the API methods, we need to should understand the dat
 * `User` - model for `users` table (note this extends the [flask_login.UserMixin]() class
 
 We can view this data easier by looking at the actual `beers.db` database in the <a href="http://sqlitebrowser.org/" target="_blank">DB Browser for SQLite</a> application.
-[DB Browser for SQLite](/images/db_browser.PNG)
+
+![DB Browser for SQLite](images/db_browser.PNG)
