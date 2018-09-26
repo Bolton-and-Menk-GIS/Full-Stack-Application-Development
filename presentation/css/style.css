@@ -1,0 +1,19 @@
+.reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5 {
+  text-transform: none !important;
+}
+
+.reveal li {font-size: 85%; }
+.reveal li li li li {font-size: 90%; }
+
+.reveal pre code{
+  /* font-size: 0.9em !important; */
+  max-height: 490px !important;
+}
+
+.reveal li {
+  margin-top: 0.5rem;
+}
+
+.reveal ul {
+  margin-bottom: 0.75rem;
+}

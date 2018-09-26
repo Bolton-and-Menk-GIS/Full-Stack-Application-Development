@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Full Stack App Development</title>
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/blood.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section class="cover">
+          <h2>Full Stack Application Development</h2>
+          <h5>by Caleb Mackey</h5>
+        </section>
+
+        <section>
+          <h4>Front End, Back End, and Full Stack?</h4>
+          <ul>
+            <li>Front End</li>
+            <ul>
+              <li>Application Code itself (html, CSS, JavaScript)</li>
+              <li>very important to have good UI/UX</li>
+            </ul>
+            <li>Back End or Server Side (Java, .NET, Ruby, Python, Node, etc)</li>
+            <ul>
+              <li>perform server side tasks, connect to databases, etc</li>
+              <li>backend processes are exposed as web services</li>
+            </ul>
+            <li>Full Stack?</li>
+            <ul>
+              <li>Front End + Back End</li>
+              <li>many applications have a backend component</li>
+            </ul>
+          </ul>
+        </section>
+
+        <section id="backend">
+          <section>
+            <h3>Why Create Web Services?</h3>
+              <ul>
+                <li class='fragment'>An application often needs data which is usually stored in a database on a server</li>
+                <li class='fragment'>A web service provides a communication layer with a database/data store to retrieve data to be used in the application</li>
+                <li class='fragment'>A web service also provides methods to access data that can be formatted into specific data structures and run processes on the server to return processed data the client won't need to process</li>
+              </ul>
+          </section>
+
+      <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+      <!-- ::::::::::::: || FRAMEWORKS STACK || CM ::::::::::::::: --> 
+      <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+        <section data-transition="convex" data-background-transition="zoom" style='margin-top:-50px'>
+          <h3>Creating Custom Web Services</h3>
+          <ul class='fragment'>
+            <li>RESTful Services can be created from many different programming languages and frameworks</li>
+            <ul>
+              <li class='fragment' type='circle'>Java, .NET, php, Swift, Node.js, Ruby on Rails, Python, etc</li>
+            </ul>
+          </ul>
+          <ul class='fragment'>
+            <li>Why Python?</li>
+            <ul class='fragment'>
+              <li>We already have a huge library of custom Python modules</li>
+              <li>Tons of Third Party modules available</li>
+            </ul>
+          </ul>
+        </section>
+
+        <section id="python-frameworks" data-transition="convex" data-background-transition="zoom" style='margin-top:-32px'>
+          <h3>Python Web Frameworks</h3>
+          <ul>
+            <li class='fragment'>Django, Flask, Bottle, Twisted, Cherry Py, Tornado, etc</li>
+            <ul>
+              <li  class='fragment' type='circle'>Django and Flask seem to be the most widely used</li>
+            </ul>
+            <li class='fragment'>"The Navy uses Django, Pirates use Flask..."</li>
+          </ul>
+        </section>
+
+    
+        <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+        <!-- ::::::::::::: || FRAMEWORKS STACK || ::::::::::::::: --> 
+        <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+        </section>
+
+        <!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+      <!-- :::::::::::::::::::::::::::::: || FLASK STACK || :::::::::::::::::::::::::::::: -->
+      <!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+      <section id="flask-stack">
+        <section id="flask-info" data-transition="concave" data-background-transition="convex" style='margin-top: -25px'>
+          <h3>Flask</h3>
+          <ul class='fragment'>
+            <li><a href="http://flask.pocoo.org/docs/0.12/" target="_blank">Python based micro web framework</a></li>
+            <ul style+'font-size: 36px;'>
+              <li class='fragment'>Very Fast Performance for REST Services</li>
+              <ul style="font-size: 30px;">
+                <li class='fragment'>Less Overhead than Django</li>
+                <li class='fragment'>Simple setup, can be up and running in 2 minutes</li>
+              </ul>
+              <li class='fragment'>Has many extensions, such as Flask-SqlAlchemy to support database Object Relational Mapping (ORM)</li>
+            </ul>
+            <li class='fragment'>Can also be used to create entire web applications (front and back end) completely written in Python via <a href="http://jinja.pocoo.org/docs/2.9/" target="_blank">Jinja2</a> templates.</li>
+          </ul>
+        </section>
+
+        <section id="minimal-flask-app" style='margin-top: -25px'>
+          <h3>Minimal working app</h3>
+          <pre><code class="hljs python" data-trim>
+            from flask import Flask, jsonify
+            app = Flask(__name__)
+
+            @app.route('/', methods=['GET'])
+            def hello_world():
+                return jsonify({'message': 'Hello, World!'})
+
+            if __name__ == '__main__':
+                #Running on http://127.0.0.1:5001/ (localhost)
+                app.run(port=5001, debug=True) 
+          </code></pre>
+        </section>
+
+        <section class="present" style='margin-top: -15px'>
+          <h4>Validating against Active Directory</h4>
+          <pre ><code class="hljs python" data-trim>
+              class SecurityHandler(object):
+                  _ldap_base = 'LDAP://ldap_server.your-domain.com'  # very important, your ldap server
+                  _default_group = None
+
+                  def validate_AD(self, usr, pw='xxx', group=_default_group):
+                      usr = usr.split('\\')[-1]
+                      dn = 'your-domain\\{}'.format(usr.split('\\')[-1])  #username with domain validation
+                      try:
+                          conn = ldap.initialize(self._ldap_base)
+                          conn.protocol_version = 3
+                          conn.set_option(ldap.OPT_REFERRALS, 0)
+                          conn.simple_bind_s(dn, pw or 'xxx')  # need to be able to throw an error off an invalid pw
+                          if group and not self.userInGroup(usr, group):  # custom method to check if user is in group
+                              return GROUP_ACCESS_DENIED
+                          return VALID_CREDENTIALS
+                      except ldap.INVALID_CREDENTIALS:
+                          return INVALID_CREDENTIALS
+          </code></pre>
+        </section>
+      </section>
+
+      <!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+      <!-- :::::::::::::::::::::::::::::: || FLASK STACK || :::::::::::::::::::::::::::::: -->
+      <!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
+        <section>
+          
+        </section>
+
+        <section id="references">
+          <h3>References</h3>
+          <ul>
+            <li><a href="https://skillcrush.com/2017/02/27/front-end-back-end-full-stack/" target="_blank">what is full stack development?</a></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+      	dependencies: [
+      		{ src: 'plugin/markdown/marked.js' },
+      		{ src: 'plugin/markdown/markdown.js' },
+      		{ src: 'plugin/notes/notes.js', async: true },
+      		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+      	]
+      });
+    </script>
+  </body>
+</html>
