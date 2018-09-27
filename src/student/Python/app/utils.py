@@ -57,7 +57,7 @@ def clean_filename(path):
     fn = re.sub('[^A-Za-z0-9]+', '_', basename).replace('__', '_')
     return os.path.join(os.path.dirname(path), fn + ext)
 
-def success(msg, **kwargs):
+def success(msg='success', **kwargs):
     """ returns a Response() object as JSON
 
     :param msg: message to send
@@ -204,7 +204,7 @@ def to_json(results, fields=None):
     else:
         return {f: getattr(results, f) for f in fields}
 
-def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
+def endpoint_query(table, fields=None, id=None, **kwargs):
     """ wrapper for for query endpoint that can query one feature by id
     or query all features via the query_wrapper
 
@@ -224,5 +224,27 @@ def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
     args = collect_args()
     for k,v in six.iteritems(kwargs):
         args[k] = v
-    results = query_wrapper(table, **args)
-    return jsonify(to_json(results, fields)) if as_response else to_json(results, fields)
+    return jsonify(query_wrapper(table, **args), fields)
+
+# toGeoJson() handler for breweries
+def toGeoJson(d):
+    """ return features as GeoJson (use this for brewery query)
+
+    :param d: dict of features to return as GeoJson
+    :return: GeoJson structure as dict
+    """
+    if not isinstance(d, list):
+        d = [d]
+    return {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": f,
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [f.get('x'), f.get('y')]
+                }
+            } for f in d
+        ]
+    }
