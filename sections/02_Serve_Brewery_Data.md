@@ -50,7 +50,7 @@ While both of the above requests are a perfectly valid way, we can also expose i
 The above query would just return the requested resource `{...}`, where the prior two queries would return the one resource inside an array `[ {...} ]`.  In order to achieve this in a sane way, the easiest is to create a helper function that will first check to see if a resource `id` is passed in and if so, return a single object, otherwise perform the query with all other conditions applied.  In VS Code (or your preferred Python IDE) navigate to the `/student/Python/app/utils.py` file and add the following function at the bottom after the `to_json` function:
 
 ```py
-def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
+def endpoint_query(table, fields=None, id=None, **kwargs):
     """ wrapper for for query endpoint that can query one feature by id
     or query all features via the query_wrapper
 
@@ -70,9 +70,7 @@ def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
     args = collect_args()
     for k,v in six.iteritems(kwargs):
         args[k] = v
-    results = query_wrapper(table, **args)
-    if kwargs
-    return jsonify(to_json(results, fields)) if as_response else to_json(results, fields)
+    return jsonify(query_wrapper(table, **args), fields)
 ```
 
 This function will be used to query all tables in the database and by default will return a `flask.Response()` object via the `flask.jsonify` function.  Note that this will also through our custom `InvalidResource` from the `app.exceptions` module if there is no resource matching requested `id`.  
@@ -153,35 +151,293 @@ Now save the file.  One nice thing about making a flask app is that whenever cha
   
   `/breweries/57`
   
-  Now that we know this works, other tables can also be exposed through the service.  Go back to the `brewery_api.py` file and add routes for the rest of the tables with this code:
+  Now that we know this works, other tables can also be exposed through the service. Before adding more routes, navigate to the `models.py` file to look at the schemas again. One thing to note is that several tables are using [one to many](https://fmhelp.filemaker.com/help/17/fmp/en/index.html#page/FMP_Help/one-to-many-relationships.html) [`relationships`](https://www.lifewire.com/database-relationships-p2-1019758).  The graphic below shows the layout of the database with the associated relationships:
   
-  under the `brewery_fields = list_fields(Brewery)` line add:
+  ![db models](images/sec_02/database_models.PNG)
   
-  ```py
-  beer_fields = list_fields(Beer)
-beer_photo_fields = filter(lambda f: f != 'data', list_fields(BeerPhotos))
+  The routes we need to make are shown below, and keep in mind we also need to model the `one-to-many` relationships as accessed by the `Table` objects:
+  
+  | parent | child | primary_key | foreign_key | parent attribute | endpoint | nested resource |
+  | ------ | ----- | :---------: | :--------- | ---------------- | ---------- | -------- |
+  | breweries |  | id |  |  | `/breweries` | `/breweries/<id>` |
+  | breweries | beers | id | brewery_id | `beers` | `/breweries/<brewery_id>/beers` | `/breweries/<brewery_id>/beers/<id>` |
+  | beers |  | id |  | | `/beers` | `/beers/<id>` |
+  | beers | beer_photos | id | beer_id | `photos` | `/beers/<beer_id>/photos` | `/beers/<beer_id>/photos/<id>` |
+  | beer_photos |  | id |  |  | `/beer/photos` | `/beer/photos/<id>` |
+  | categories |  | id | | |`/categories` | `/categories/<cat_id>` |
+  | categories | styles | id | cat_id | `styles` |`/categories/<cat_id>/styles` | `/categories/<cat_id>/styles/<id>` |
+  | styles | | id | | | `/beer/styles` | `/beer/styles/<id>` |
+  | users |  | id |  |  | `/users` | `/users/id` |
+  | users | breweries | id | created_by | `submitted_breweries` | `/users/<created_by>/breweries` |  `/users/<created_by>/breweries/<id>` |
+  | users | beers | id | created_by | `submitted_beers` | `/users/<created_by>/beers` |  `/users/<created_by>/beers/<id>` |
+  
+  *Note: not all API methods defined above will be used in the app, but we are building them anyways for completeness of the API*
+  
+  Go back to the `brewery_api.py` file and we can start adding our routes from the table above.
+  
+1 . Add the `/breweries/<id>beers` routes to get beers per brewery: 
+
+*Note: only the `Mankato Brewery` has featured beers in the database from the boiler plate*
+
+```py
+@brewery_api.route('/breweries/<id>/beers')
+@brewery_api.route('/breweries/<id>/beers/<bid>')
+def get_beers_from_brewery(id=None, bid=None):
+    if not id:
+        raise InvalidResource
+
+    # fetch brewery first
+    brewery = query_wrapper(Brewery, id=int(id))[0]
+    args = collect_args()
+    fields = args.get('fields')
+
+    # fetch beers
+    if bid:
+        try:
+            beers = brewery.beers
+            # should be a way to achieve this via filter or join?
+            return jsonify(to_json([b for b in beers if b.id ==int(bid)][0], fields))
+        except:
+            raise InvalidResource
+    return jsonify(to_json(brewery.beers, **collect_args()))
 ```
 
-and under the get breweries route add:
-  
-  ```py
-  @brewery_api.route('/beer/categories')
+2. Add the `/beers` routes:
+
+```py
+@brewery_api.route('/beers')
+@brewery_api.route('/beers/<id>')
+def get_beer_by_id(id=None):
+    return endpoint_query(Beer, id=id, **collect_args())
+```
+
+3. Add the `/beers/<beer_id>/photos` routes:
+
+for the `beer_photos` table, in case the `photo_storage_type` is set to `database`, we do not want to return the raw `blob` data for the photo as `JSON`.  So for this table, we will limit the query fields by adding a variable to specify the output fields.  Add this somewhere above the `# API METHODS BELOW` section:
+
+`beer_photo_fields = [f for f in list_fields(BeerPhotos) if f != 'data']`
+
+And then back in the `# API METHODS BELOW` section add the nested `/beers/photos` endpoint route:
+
+```py
+@brewery_api.route('/beers/<id>/photos')
+def get_beer_photos(id=None):
+    if not id:
+        raise InvalidResource
+
+    beer = query_wrapper(Beer, id=int(id))[0]
+    return jsonify(to_json(beer.photos, beer_photo_fields))
+```
+
+4. Next, expose the `/beer/photos` route by itself so beer photos can be queried outside the context of a parent beer:
+
+*Note: the `/beer/` prefix is different than `/beers/` by design, otherwise we could have collisions with the `/beers/<id>` route*
+
+```py
+@brewery_api.route('/beer/photos')
+@brewery_api.route('/beer/photos/<id>')
+def get_beer_photo(id=None):
+    return endpoint_query(BeerPhotos, beer_photo_fields, id)
+```
+
+5. Add the `/categories` route:
+
+```py
+@brewery_api.route('/beer/categories')
 @brewery_api.route('/beer/categories/<id>')
 def get_categories(id=None):
-    return endpoint_query(Category, category_fields, id)
+    return endpoint_query(Category, id=id, **collect_args())
+```
 
+6. Add the nested `/category<id>/styles` route:
+
+```py
 @brewery_api.route('/beer/categories/<id>/styles')
 def get_category_styles(id):
     if id:
-        category_styles = query_wrapper(Category, id=int(id))[0].styles
-        return jsonify(to_json(category_styles, style_fields))
+        try:
+            category_styles = query_wrapper(Category, id=int(id))[0].styles
+        except IndexError:
+            raise InvalidResource
+        return jsonify(to_json(category_styles, **collect_args()))
+    raise InvalidResource
+```
 
+7. Add the `/beer/styles` routes:
+
+```py
 @brewery_api.route('/beer/styles')
 @brewery_api.route('/beer/styles/<id>')
 def get_styles(id=None):
-    return endpoint_query(Style, style_fields, id)
+    return endpoint_query(Style, id=id, **collect_args())
 ```
-  
-  
+
+That is all we will add to the `brewery_api` blueprint for now.  The `users` table queries will be handled in the `security_api` blueprint.  Now that all these routes have been added, save the changes and and test them using Postman. 
+
+If you see this error in the `bash` shell:
+
+`Application Terminated: press any key to exit...`
+
+That means there is an error in the flask application.  Go back through the steps above to make sure everything is correct.  You may also notice errors in the API when you see this error in Postman which just means the application is not running:
+
+![postman error](/images/sec_02/postman_error.PNG)
+
+The application usually only breaks when there is a syntax error or a variable/module is not resolved.  When errors occur on route functions, the error will be returned, but the application continues to run.
+
+### running the API tests in Postman
+
+*Make sure you have imported the `Brewery_API.postman_collection.json` file [from step one](01_Getting_Started.md#set-up-postman-to-test-our-api).*
+
+Navigate to the `Brewery API` collection in the left pane and expand the `brewery tests` folder.  You should see the following tests (may differ slightly):
+
+![api tests](images/brewery_tests.PNG)
+
+Run the following tests:
+
+1. `get breweries`
+2. `get breweries in Minneapolis`
+3. `get breweries in Minneapolis with field limit`
+4. `beers served by brewery`
+5. `get specific brewery`
+6. `test invalid resource error` - this is thrown when trying to access a resource that doesn't exist
+7. `nested beer by brewery` 
+8. `get beers`
+9. `get beer photo info`
+10. `get nested beer`
+11. `photos by beer`
+12. `get beer photos`
+13. `nested beer photo`
+14. `beer categories`
+15. `nested beer category`
+16. `beer styles`
+17. `nested beer styles`
+
+### displaying the breweries in our `Brewery Finder` application
+
+Now that we have the breweries available for query in our REST API, we can add them as a layer source in the `Mapbox-gl` Map.  The `Mapbox-gl` JavaScript API documentation tells us that a layer has to be loaded from a [`GeojsonSource`](https://www.mapbox.com/mapbox-gl-js/api/#geojsonsource) which requires a structure `GeoJson` structure like this: 
+
+```json
+{
+   "type": "FeatureCollection",
+   "features": [{
+       "type": "Feature",
+       "properties": {
+           "field": "test value"
+       },
+       "geometry": {
+           "type": "Point",
+           "coordinates": [
+               -76.53063297271729,
+               39.18174077994108
+           ]
+       }
+   }]
+}
+ ```
+ 
+ The most important piece is the `geometry` property for each feature.  Luckily the `x` and `y` coordinates are stored in the `breweries` table, so the data just needs to be converted to `GeoJson` format.  We could certainly handle this in the client side application with JavaScript, however, that is a burden that should not be placed on the client.  Instead, we can set up a special **request format** parameter only available to the `/breweries` route queries.  By default, the API should return brewery info in `JSON` as it currently does, but should also support fetching in `GeoJson` format.  This is best handled as a query string parameter in the url with the following client query:
+ 
+ `/breweries?f=geojson`
+
+To implement this in the REST API, create the following function inside the `app.utils` module (`/app/utils.py`):
+
+```py
+# toGeoJson() handler for breweries
+def toGeoJson(d):
+    """ return features as GeoJson (use this for brewery query)
+
+    :param d: dict of features to return as GeoJson
+    :return: GeoJson structure as dict
+    """
+    if not isinstance(d, list):
+        d = [d]
+    return {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": f,
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [f.get('x'), f.get('y')]
+                }
+            } for f in d
+        ]
+    }
+```
+
+Save the changes to the `utils.py` file.  Now go back into the `brewery_api.py` file and replace the `/breweries` route code with this:
+
+```py
+@brewery_api.route('/breweries')
+@brewery_api.route('/breweries/<id>')
+@errorHandler
+def get_breweries(id=None):
+    args = collect_args()
+    f = args.get('f', 'json')
+    handler = toGeoJson if f.lower() == 'geojson' else lambda t: t
+    fields = args.get('fields') or brewery_fields
+
+    if id:
+        try:
+            brewery = query_wrapper(Brewery, id=int(id))[0]
+            return jsonify(handler(to_json(brewery, fields)))
+        except IndexError:
+            raise InvalidResource
+
+    # query as normal
+    results = query_wrapper(Brewery, **args)
+    return jsonify(handler(to_json(results, fields)))
+```
+
+The above modification will now check for a query parameter called `f` and if it is set to `geojson` it will pass the `to_json` result through our `toGeoJson()` function via the `handler` variable (if not used the `lambda` function just returns the original object).
+
+Save those changes and go back to Postman and run the `query breweries as geojson` test.  The response should now be something like:
+
+```json
+{
+    "features": [
+        {
+            "geometry": {
+                "coordinates": [
+                    -93.27920282199993,
+                    44.98494304000007
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "address": "414 6th Ave N",
+                "brew_type": "Brewery",
+                "city": "Minneapolis",
+                "comments": "2014 - 13,000 barrels produced (5th in MN)",
+                "created_by": 1,
+                "friday": "3pm-11pm",
+                "id": 1,
+                "monday": "",
+                "name": "Fulton Brewing Co",
+                "saturday": "12pm-11pm",
+                "state": "MN",
+                "sunday": "12pm-6pm",
+                "thursday": "3pm-10pm",
+                "tuesday": "3pm-10pm",
+                "website": "http://www.fultonbeer.com/",
+                "wednesday": "3pm-10pm",
+                "x": -93.27920282199993,
+                "y": 44.98494304000007,
+                "zip": "55401"
+            },
+            "type": "Feature"
+        },
+        //... more results
+    ],
+    "type": "FeatureCollection"
+}
+```
+
+Now that this is working, we can go back to our JavaScript application to add the breweries into the map.  Proceed to [Section 3](03_Add_Breweries_to_Map.md).
 
 
+
+
+  
+  
