@@ -74,6 +74,7 @@ In the interest of saving time, I have created some boiler plates to start with 
 * `utils.py` - contains utility functions essential to the application such as `collect_args()`, etc
 * `database_utils.py` - contains helper function for processing photos for beers
 * `models.py` - contains the schema and table objects for SqlAlchemy
+* `security.py` - contains boiler plate code for security
 * `/mac_venv` - python `virtualenv` for mac
 * `/beer_sample` - contains csv's and other sample data used to create the brewery data
     *  `create_db_data.py` - script that creates Sqlite database and loads in all brewery data
