@@ -10,9 +10,7 @@ from base import errorHandler
 # add brewery API blueprint
 brewery_api = Blueprint('brewery_api', __name__)
 
-# get list of brewery fields to use as default
-brewery_fields = list_fields(Brewery)
-beer_fields = list_fields(Beer)
+# default fields
 beer_photo_fields = [f for f in list_fields(BeerPhotos) if f != 'data']
 
 # API METHODS BELOW
@@ -24,7 +22,7 @@ def get_breweries(id=None):
     args = collect_args()
     f = args.get('f', 'json')
     handler = toGeoJson if f.lower() == 'geojson' else lambda t: t
-    fields = args.get('fields') or brewery_fields
+    fields = args.get('fields')
 
     if id:
         try:
@@ -46,17 +44,17 @@ def get_beers_from_brewery(id=None, bid=None):
     # fetch brewery first
     brewery = query_wrapper(Brewery, id=int(id))[0]
     args = collect_args()
-    fields = args.get('fields', beer_fields)
+    fields = args.get('fields')
 
     # fetch beers
     if bid:
         try:
             beers = brewery.beers
             # should be a way to achieve this via filter or join?
-            return jsonify(to_json([b for b in beers if b.id ==int(bid)][0], beer_fields))
+            return jsonify(to_json([b for b in beers if b.id ==int(bid)][0], fields))
         except:
             raise InvalidResource
-    return jsonify(to_json(brewery.beers, fields))
+    return jsonify(to_json(brewery.beers, **collect_args()))
 
 @brewery_api.route('/beers')
 @brewery_api.route('/beers/<id>')
