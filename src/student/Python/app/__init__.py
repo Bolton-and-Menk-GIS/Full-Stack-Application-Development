@@ -1,6 +1,7 @@
 from base import FlaskExtension
 from flask import Flask, jsonify
 from utils import *
+from security import security_api, userStore, unauthorized_callback
 
 # load config
 config = load_config()
@@ -27,6 +28,9 @@ app.config['REMEMBER_COOKIE_NAME'] = 'beer_app_token'
 
 # uploads folder for beer images
 app.config['UPLOAD_FOLDER'] = upload_folder
+
+# register blueprints to get functionality from brewery and security api's
+app.register_blueprint(security_api)
 
 # API METHODS BELOW
 @app.route('/')

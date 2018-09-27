@@ -12,7 +12,7 @@ brewery_api = Blueprint('brewery_api', __name__)
 # get list of brewery fields to use as default
 brewery_fields = list_fields(Brewery)
 beer_fields = list_fields(Beer)
-beer_photo_fields = filter(lambda f: f not in ('data', 'thumbnail'), list_fields(BeerPhotos))
+beer_photo_fields = filter(lambda f: f  !='data', list_fields(BeerPhotos))
 
 # constants
 category_fields = list_fields(Category)

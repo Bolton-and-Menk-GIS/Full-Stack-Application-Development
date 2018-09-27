@@ -43,8 +43,9 @@ login_manager.init_app(app)
 login_manager.unauthorized_handler(unauthorized_callback)
 
 # register blueprints to get functionality from brewery and security api's
-app.register_blueprint(brewery_api)
 app.register_blueprint(security_api)
+app.register_blueprint(brewery_api)
+
 
 
 # callback to reload the user object for flask-login
