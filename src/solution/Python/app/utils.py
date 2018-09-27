@@ -206,7 +206,7 @@ def query_wrapper(table, **kwargs):
         return session.query(table).all()
 
 
-def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
+def endpoint_query(table, fields=None, id=None,  **kwargs):
     """ wrapper for for query endpoint that can query one feature by id
     or query all features via the query_wrapper
 
@@ -227,7 +227,7 @@ def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
     for k,v in six.iteritems(kwargs):
         args[k] = v
     results = query_wrapper(table, **args)
-    return jsonify(to_json(results, fields)) if as_response else to_json(results, fields)
+    return jsonify(to_json(results, fields))
 
 
 # toGeoJson() handler for breweries
