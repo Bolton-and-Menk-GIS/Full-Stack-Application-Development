@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # create virtualenv first
 # find python (I'm sure there's a better way to do this...)
 if [ -e c:/python27/python.exe ]; then
@@ -42,7 +43,7 @@ fi
 source ./app/venv/Scripts/activate
 echo "Activated Virtual Environment, now installing dependencies..."
 
-# # install all dependencies
+# install all dependencies
 pip install six
 echo "installed six"
 

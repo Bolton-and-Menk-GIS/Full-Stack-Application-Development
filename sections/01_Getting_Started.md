@@ -28,10 +28,13 @@
 #### test the Flask app
 1. Before we can launch our flask REST API (app), we need to make sure the dependencies required are available.  For your convenience, I have provided a shell script to create a `virtualenv` and install the necessary modules for windows users. Find the `setup_venv.sh` file inside the `student/Python` folder and double click to run.
     * If using a mac, skip this step as there is a `virtualenv` called `mac_venv` inside the `app` folder.  (note: the script may not work for everyone, if you're having issues visit the [Setting up the virtualenv manually]() page).   
+
 2. start the Flask service by double clicking the `run.sh` insdie the `student/Python` folder
     * the terminal message should say it started the `virtualenv` and the app is running on port `5001`
     * *IMPORTANT* - make sure to hit `Ctrl + C` to stop the app from within the terminal window, simply closing the window **may not** kill the python process!
+
 3. Go back to Postman and find the `Brewery API` Collection in the left pane and expand it
+
 4. the first request in the list is a `GET` request called `endpoints`.  Click on this.
     * notice the request url is set to `{{host}}:{{port}}/endpoints`.  Postman will use our environment varialbes to fill in the host and port automatically.  It is good practice to use variables for things like this to test development and production environments by simply swapping out the host and port variables.
     * Hit the `Send` button to make the requst.  You should get a JSON response that looks like this:
@@ -63,7 +66,7 @@
 }
 ```
 
-6. the `/endpoints` request automatically shows all the available routes in our API.  This will grow as we add more.  
+5. the `/endpoints` request automatically shows all the available routes in our API.  This will grow as we add more.  
 
 #### understanding request parameters
 when working with   `HTTP` requests, there's a variety of ways data/query params can be passed back and forth.  The `app.utils` Python module has a powerful function called `collect_args`, which will parse request arguments from the [query string](https://en.wikipedia.org/wiki/Query_string), [form data](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Sending_and_retrieving_form_data), or raw json in the request body.
@@ -109,8 +112,9 @@ Note that the Brewery Information contains latitude and longitude values stored 
 * `mapbox-gl-vue` - implements the Mapbox-gl Map as a [Vue component](https://github.com/phegman/vue-mapbox-gl) for Vue.js
 
 2. Now let's take a quick look at the [code](https://github.com/Bolton-and-Menk-GIS/Full-Stack-Application-Development/tree/master/src/student/app/src) provided in the boiler plate in VS Code (`/student/app/src`):
+
 3. View the `main.js` file in VS Code.  This begins with importing all the necessary modules.  Some important things to note is that since we are using a plugin for Vue (`bootstrap-vue`), we have to tell Vue to use it by doing:
-4. 
+ 
 `Vue.use(BootstrapVue)`
 
 We are also going to register font awesome icons as a global component like this: 
@@ -251,16 +255,6 @@ However, because we did implement the `PageNotFound` route to catch any unmatche
 ![not found](images/app_images/page_not_found.PNG)
 
 Now that the basic front end application is running and we have a working back end API as well, let's start building the fun stuff!  Feel free to move on to [Section 2](https://github.com/Bolton-and-Menk-GIS/Full-Stack-Application-Development/blob/master/sections/02_Serve_Brewery_Data.md) now.
-
-
-
-
-
-
-
-
-
-
 
 
 

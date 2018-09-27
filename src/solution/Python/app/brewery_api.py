@@ -64,16 +64,19 @@ def get_breweries(id=None):
     handler = toGeoJson if f.lower() == 'geojson' else lambda t: t
     fields = args.get('fields') or brewery_fields
 
-    if id:
-        try:
-            brewery = query_wrapper(Brewery, id=int(id))[0]
-            return jsonify(handler(to_json(brewery, fields)))
-        except IndexError:
-            raise InvalidResource
-
-    # query as normal
-    results = query_wrapper(Brewery, **args)
+    results = endpoint_query(Brewery, fields, id, as_response=False, **args)
     return jsonify(handler(to_json(results, fields)))
+
+    # if id:
+    #     try:
+    #         brewery = query_wrapper(Brewery, id=int(id))[0]
+    #         return jsonify(handler(to_json(brewery, fields)))
+    #     except IndexError:
+    #         raise InvalidResource
+
+    # # query as normal
+    # results = query_wrapper(Brewery, **args)
+    # return jsonify(handler(to_json(results, fields)))
 
 @brewery_api.route('/breweries/<id>/beers')
 @brewery_api.route('/breweries/<id>/beers/<bid>')

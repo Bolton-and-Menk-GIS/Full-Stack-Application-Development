@@ -15,60 +15,51 @@ in order to have the best development experience, it is recommended that before 
     * need editor for Python as well, (VS Code can be configured to work with both Python and JavaScript) such as [PyScripter](https://sourceforge.net/projects/pyscripter/), [PyCharm](https://www.jetbrains.com/pycharm/download/#section=windows) (community edition is free), etc.
 * [Google Chrome](https://www.google.com/chrome/?brand=CHBD&gclid=Cj0KCQjwuafdBRDmARIsAPpBmVWnLFUBgsRQnZuIBhsYc5G-sEekeIx9CEMd53Yrv0RTlVvD-k7ULsgaApzEEALw_wcB&gclsrc=aw.ds&dclid=COmg_c3R1t0CFQ_JwAodfIQA_Q) - best browser for debugging
 * [Fiddler](https://www.telerik.com/fiddler) - web debugging proxy to monitor requests
-* [Postman](https://www.telerik.com/fiddler) - API Development Environment that will be used to test our REST API
+* [Postman](https://www.getpostman.com/) - API Development Environment that will be used to test our REST API
 * [DB Browser for Sqlite](http://sqlitebrowser.org/) - convenieintly view/update Sqlite databases
 * it would also be beneficial to have both `pip` and `virtualenv` installed for Python
 
 ### Demo Application
 Images of the `Brewery Finder` Demo App can be found below:
 
+**Map View showing Brewery Locations**
 ![map](/sections/images/app_images/map_view.PNG)
 
-**Map View showing Brewery Locations**
-
+**Auto-Complete search for breweries by name**
 ![search](/sections/images/app_images/typeahead.png)
 
-**Auto-Complete searches for breweries by name**
-
+**Quick overview of Brewery with featured beers**
 ![brewrey info](/sections/images/app_images/brewery_info.PNG)
 
-**Quick overview of Brewery with featured beers**
-
+**Login Page to authenticate users for extended app functionality**
 ![login](/sections/images/app_images/login.PNG)
 
-**Login Page to authenticate users for extended app functionality**
-
+**As well as allowing new users to register with form validation**
 ![sign up](/sections/images/app_images/sign_up.PNG)
 
-**As well as allowing new users to register**
-
-#### extra functionality for authenticated users
-
-![export brewery info](/sections/images/app_images/export.PNG)
+### with extra functionality for authenticated users:
 
 **Export Tables from the database (with a shapefile option for Breweries)**
+![export brewery info](/sections/images/app_images/export.PNG)
 
-![edit brewery 1](/sections/images/app_images/editable_brewery1.PNG)
 
 **Add/Edit/Update/Delete Brewery**
-
-![edit brewery 2](/sections/images/app_images/editable_brewery2.PNG)
+![edit brewery 1](/sections/images/app_images/editable_brewery1.PNG)
 
 **Also can add/delete featured beers from this screen**
-
-![edit beer](/sections/images/app_images/editable_beer.PNG)
+![edit brewery 2](/sections/images/app_images/editable_brewery2.PNG)
 
 **Edit a featured beer**
-
-![create beer](/sections/images/app_images/create_beer.PNG)
+![edit beer](/sections/images/app_images/editable_beer.PNG)
 
 **Or create a new beer and upload a photo for it**
+![create beer](/sections/images/app_images/create_beer.PNG)
 
-### we will also create a feature rich REST API
+
+### we will also create a feature rich REST API:
 
 ![api test](/sections/images/api_test.PNG)
 
-**Serve up brewery database tables via REST**
 
 ### Folder Structure
 In the interest of saving time, I have created some boiler plates to start with that have both the core Python Flask service set up as well as the skeleton of our `Brewery Finder` app.  These are located in the [student folder]().  The sections below outline the contents of this folder:
@@ -100,7 +91,7 @@ In the interest of saving time, I have created some boiler plates to start with 
 * `vue.config.js` - main configuration options for webpack and production build
 
 ### Workshop Instructions
-The instructions for going through this workshop are broken into sections for each part.  There is also an associated branch for each part with the exception of part one as the boiler plates are already created in the `master` version of this branch.  To begin, go to [Step 1. Getting Started](https://github.com/Bolton-and-Menk-GIS/Full-Stack-Application-Development/blob/master/sections/01_Getting_Started.md).
+The instructions for going through this workshop are broken into sections for each part.  There is also an associated branch for each part with the exception of part one as the boiler plates are already created in the `master` version of this branch.  To begin, go to [Step 1. Getting Started](/sections/01_Getting_Started.md).
 
 
 
