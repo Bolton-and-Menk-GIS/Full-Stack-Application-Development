@@ -1,4 +1,4 @@
-# Section 02: Serving Brewery Data
+# Section 2: Serving Brewery Data
 
 **TL;DR** - *The instructions for this section are outlined below.  If you do not want to copy and paste the code snippets, you can switch to the [solution branch]() for this section by running: `git checkout 02-serve-brewery-data`*
 
@@ -27,7 +27,7 @@ To acheive this, the `collect_args()` function can be used to parse the query pa
 
 `SELECT * from breweries WHERE city = 'Minneapolis'`
 
-Fortunately, we are using `flask_sqlalchemy`, which is an [Object Relational Mapper](https://pythonspot.com/orm-with-sqlalchemy/) (ORM).  As a reminder the definition of an ORM from the above link:
+Fortunately, we are using `flask_sqlalchemy`, which is an [Object Relational Mapper](https://pythonspot.com/orm-with-sqlalchemy/) (ORM) so we do not have to write raw statements.  As a reminder the definition of an ORM from the above link:
 
 >An object relational mapper maps a relational database system to objects. The ORM is independent of which relational database system is used. From within Python, you can talk to objects and the ORM will map it to the database.
 
