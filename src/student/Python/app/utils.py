@@ -203,3 +203,26 @@ def to_json(results, fields=None):
             return []
     else:
         return {f: getattr(results, f) for f in fields}
+
+def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
+    """ wrapper for for query endpoint that can query one feature by id
+    or query all features via the query_wrapper
+
+    :param table: Table to query
+    :param fields: fields to be returned in query
+    :param id: optional resource ID
+    :return: Response() object for query result as json
+    """
+    if id != None:
+        try:
+            item = query_wrapper(table, id=int(id))[0]
+            return jsonify(to_json(item, fields))
+        except IndexError:
+            raise InvalidResource
+
+    # check for args and do query
+    args = collect_args()
+    for k,v in six.iteritems(kwargs):
+        args[k] = v
+    results = query_wrapper(table, **args)
+    return jsonify(to_json(results, fields)) if as_response else to_json(results, fields)

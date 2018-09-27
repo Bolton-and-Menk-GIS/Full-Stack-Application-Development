@@ -228,7 +228,6 @@ def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
     for k,v in six.iteritems(kwargs):
         args[k] = v
     results = query_wrapper(table, **args)
-    if kwargs
     return jsonify(to_json(results, fields)) if as_response else to_json(results, fields)
 
 
