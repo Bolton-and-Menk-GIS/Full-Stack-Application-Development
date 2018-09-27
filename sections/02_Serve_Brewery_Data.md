@@ -280,7 +280,7 @@ If you see this error in the `bash` shell:
 
 That means there is an error in the flask application.  Go back through the steps above to make sure everything is correct.  You may also notice errors in the API when you see this error in Postman which just means the application is not running:
 
-![postman error](/images/sec_02/postman_error.PNG)
+![postman error](images/sec_02//postman_error.PNG)
 
 The application usually only breaks when there is a syntax error or a variable/module is not resolved.  When errors occur on route functions, the error will be returned, but the application continues to run.
 
@@ -290,7 +290,7 @@ The application usually only breaks when there is a syntax error or a variable/m
 
 Navigate to the `Brewery API` collection in the left pane and expand the `brewery tests` folder.  You should see the following tests (may differ slightly):
 
-![api tests](images/brewery_tests.PNG)
+![api tests](images/sec_02/brewery_tests.PNG)
 
 Run the following tests:
 
