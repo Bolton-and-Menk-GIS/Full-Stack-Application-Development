@@ -22,9 +22,11 @@
 
     <!-- MAP VIEW-->
     <map-view ref="mapView" 
+      @brewery-identified="showBreweryInfo"
       @toggle-identify="identifyActivePanel"
       @toggle-menu="menuActivePanel"/>
 
+    
   </div>
 </template>
 
@@ -32,6 +34,7 @@
   import MapView from './MapViewMglv';
   import Sidebar from './Sidebar';
   import BreweryInfo from './BreweryInfo'
+
   export default {
     name: "home",
     components: {
@@ -39,6 +42,7 @@
       Sidebar,
       BreweryInfo
     },
+
     data(){
       return {
         selectedBrewery: null,
@@ -50,11 +54,14 @@
         userIsAuthenticated: false
       }
     },
+
     mounted(){
       console.log('MOUNTED HOME COMPONENT!');
       console.log('ref to map view: ', this.$refs.mapView);
     },
+
     methods: {
+
       showBreweryInfo(brewery){
         // force panel to open with identify active
         this.selectedBrewery = brewery;
@@ -64,12 +71,14 @@
           this.identifyActive = true;
         }
       },
+
       clearSelection(){
         this.selectedBrewery = null;
         if (this.identifyActive){
           this.$refs.sidebar.collapse();
         }
       },
+
        menuActivePanel(){
         // if identify is shown, toggle on menu
         this.sidebarActive = this.$refs.sidebar.active;
@@ -82,6 +91,7 @@
           this.$refs.sidebar.toggle();
         }
       },
+
       identifyActivePanel(){
         this.sidebarActive = this.$refs.sidebar.active;
         if (this.menuActive && this.$refs.sidebar.active){
@@ -93,6 +103,7 @@
           this.$refs.sidebar.toggle();
         }
       },
+
       // Below methods are not what we normally do in Vue.js, things are done 
       // with vanilla js to interact with elements within the Mapboxgl canvas container
       handleExpand(expanded){
@@ -104,10 +115,12 @@
           this.activateButton(`.expand-${this.menuActive ? 'menu': 'identify'}`)
         }
       },
+
       clearActiveButtons(){
         const active = document.querySelectorAll('.control-btn-active:not(.add-brewery)');
         active.forEach(e => e.classList.remove('control-btn-active'));
       },
+
       activateButton(selector){
         // Normally do not have to do things like this in Vue
         this.clearActiveButtons();
@@ -129,12 +142,14 @@
     },
     
     watch: {
+
       menuActive(newVal){
         // handle state when panel is already open, and switched from identify to menu
         if (newVal){
           this.activateButton('.expand-menu');
         }
       },
+
       identifyActive(newVal){
         // handle state when panel is already open, and switched from menu to identify
         if (newVal){
