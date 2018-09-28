@@ -1,191 +1,641 @@
 {
-	"variables": [],
 	"info": {
 		"name": "Brewery API",
-		"_postman_id": "56a3d796-68c8-fae7-ceee-e808fa4d14ba",
+		"_postman_id": "ed6cf078-c753-48ba-5f3c-40ecccf7aec7",
 		"description": "",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
+			"name": "brewery tests",
+			"description": "",
+			"item": [
+				{
+					"name": "get breweries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries"
+							]
+						},
+						"description": "gets breweries, supports field query by parameter"
+					},
+					"response": []
+				},
+				{
+					"name": "get breweries in Minneapolis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries?city=Minneapolis",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "Minneapolis",
+									"equals": true
+								}
+							]
+						},
+						"description": "gets breweries in Minneapolis"
+					},
+					"response": []
+				},
+				{
+					"name": "get breweries in Minneapolis with field limit",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries?city=Minneapolis&fields=name,address,website",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "Minneapolis",
+									"equals": true
+								},
+								{
+									"key": "fields",
+									"value": "name,address,website",
+									"equals": true
+								}
+							]
+						},
+						"description": "gets breweries in Minneapolis"
+					},
+					"response": []
+				},
+				{
+					"name": "beers served by brewery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries/57/beers",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries",
+								"57",
+								"beers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get specific brewery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "localhost:5000/breweries/57",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"breweries",
+								"57"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "test invalid resource error",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "localhost:5000/breweries/999",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"breweries",
+								"999"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nested beer by brewery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries/57/beers",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries",
+								"57",
+								"beers"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "get beers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "user2",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "user2_secret",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/beers",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beers"
+							]
+						},
+						"description": "get beers"
+					},
+					"response": []
+				},
+				{
+					"name": "get beer photo info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "user2",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "user2_secret",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/beers/1/photos",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beers",
+								"1",
+								"photos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get nested beer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beers/1",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beers",
+								"1"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "photos by beer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beers/1/photos",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beers",
+								"1",
+								"photos"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "get beer photos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/photos",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"photos"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nested beer photo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/photos/1",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"photos",
+								"1"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "beer categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/categories",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"categories"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nested beer category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/categories/3",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"categories",
+								"3"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "styles by category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/categories/3/styles",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"categories",
+								"3",
+								"styles"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "beer styles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/styles",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"styles"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nested beer style",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/styles/1",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"styles",
+								"1"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "query breweries as geojson",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries?f=geojson",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries"
+							],
+							"query": [
+								{
+									"key": "f",
+									"value": "geojson",
+									"equals": true
+								}
+							]
+						},
+						"description": "gets breweries in geojson format"
+					},
+					"response": []
+				},
+				{
+					"name": "download beer photo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/photos/1/download",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"photos",
+								"1",
+								"download"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "security tests",
+			"description": "",
+			"item": [
+				{
+					"name": "create user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Caleb Mackey",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "calebma",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "caleb.mackey@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "beerapp",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5000/users/create",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"users",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login test user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "test_user",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "user123",
+									"type": "text"
+								},
+								{
+									"key": "remember",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/users/login",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "endpoints",
 			"request": {
-				"url": "localhost:5000/endpoints",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": []
-				},
-				"description": ""
+				"body": {},
+				"url": {
+					"raw": "{{host}}:{{port}}/endpoints",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"endpoints"
+					]
+				}
 			},
 			"response": []
 		},
 		{
-			"name": "get breweries",
+			"name": "/test",
 			"request": {
-				"url": "localhost:5000/breweries",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": []
-				},
-				"description": "gets breweries, supports field query by parameter"
-			},
-			"response": []
-		},
-		{
-			"name": "create user",
-			"request": {
-				"url": "localhost:5000/users/create",
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
 				"body": {
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "name",
-							"value": "Caleb Mackey",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "username",
-							"value": "calebma",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "email",
-							"value": "caleb.mackey@gmail.com",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "password",
-							"value": "beerapp",
-							"type": "text",
-							"enabled": true
+							"key": "body_param",
+							"value": "bar",
+							"description": "",
+							"type": "text"
 						}
 					]
 				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "get specific brewery",
-			"request": {
-				"url": "localhost:5000/breweries/57",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": []
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "beers served by brewery",
-			"request": {
-				"url": "localhost:5000/breweries/57/beers",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": []
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "login test user",
-			"request": {
-				"url": "{{host}}:{{port}}/users/login",
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
+				"url": {
+					"raw": "{{host}}:{{port}}/test?query_param=foo",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"test"
+					],
+					"query": [
 						{
-							"key": "username",
-							"value": "test_user",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "password",
-							"value": "user123",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "remember",
-							"value": "true",
-							"type": "text",
-							"enabled": true
+							"key": "query_param",
+							"value": "foo",
+							"equals": true
 						}
 					]
 				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "get beers",
-			"request": {
-				"url": "{{host}}:{{port}}/beers/1",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "username",
-							"value": "user2",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "password",
-							"value": "user2_secret",
-							"type": "text",
-							"enabled": true
-						}
-					]
-				},
-				"description": "get beers"
-			},
-			"response": []
-		},
-		{
-			"name": "get beer photo info",
-			"request": {
-				"url": "{{host}}:{{port}}/beers/1/photos",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "username",
-							"value": "user2",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "password",
-							"value": "user2_secret",
-							"type": "text",
-							"enabled": true
-						}
-					]
-				},
-				"description": ""
+				"description": "test collect args function to return input arguments"
 			},
 			"response": []
 		}
