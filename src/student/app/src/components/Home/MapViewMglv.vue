@@ -37,7 +37,9 @@
     },
     data() {
       return {
-        map: null
+        map: null,
+        selectionMarker: null,
+        state: 'default'
       }
     },
     mounted(){
