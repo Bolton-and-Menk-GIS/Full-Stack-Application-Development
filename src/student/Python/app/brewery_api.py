@@ -13,6 +13,10 @@ brewery_api = Blueprint('brewery_api', __name__)
 # default fields
 beer_photo_fields = [f for f in list_fields(BeerPhotos) if f != 'data']
 
+# load app config file
+config = load_config()
+PHOTO_STORAGE_TYPE = config.get('photo_storage_type', 'database')
+
 # API METHODS BELOW
 
 @brewery_api.route('/breweries')
@@ -93,4 +97,18 @@ def get_category_styles(id):
 @brewery_api.route('/beer/styles/<id>')
 def get_styles(id=None):
     return endpoint_query(Style, id=id, **collect_args())
+
+@brewery_api.route('/beer/photos/<id>/download')
+def download_beer_photo(id):
+    if not id:
+        raise InvalidResource
+
+    beer_photo = query_wrapper(BeerPhotos, id=int(id))[0]
+
+    # handle appropriately based on config
+    if PHOTO_STORAGE_TYPE == 'filesystem':
+        to_send = os.path.join(upload_folder, beer_photo.photo_name)
+    else:
+        to_send = BytesIO(beer_photo.data)
+    return send_file(to_send, attachment_filename=beer_photo.photo_name, as_attachment=True)
 

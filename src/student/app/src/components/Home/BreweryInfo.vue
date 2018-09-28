@@ -15,7 +15,16 @@
       <p>{{ properties.city }}, {{ properties.state }} {{ properties.zip }}</p>
       <b-link :href="properties.website" target="_blank" v-if="properties.website">view website</b-link>
 
-      <!-- featured beers will go here -->
+      <!-- featured beers -->
+      <div v-if="featuredBeers.length">
+        <hr>
+        <h5><strong>Featured Beers</strong></h5>
+        <b-list-group class="featured-beers-container">
+          <b-list-group-item v-for="beer in featuredBeers" :key="beer.id">
+            <featured-beer :beer="beer"></featured-beer>
+          </b-list-group-item>
+        </b-list-group>
+      </div>
 
     </b-card>
 
@@ -28,6 +37,8 @@
 
 <script>
   import { EventBus } from "../../modules/EventBus";
+  import api from '../../modules/api';
+  import FeaturedBeer from './FeaturedBeer';
 
   export default {
     name: "brewery-info",
@@ -42,7 +53,9 @@
       },
       userIsAuthenticated: false
     },
-
+    components: {
+      FeaturedBeer
+    },
     data() {
       return {
         featuredBeers: []
@@ -51,16 +64,36 @@
 
     mounted(){
       console.log('MOUNTED BREWERY INFO COMPONENT: ', this);
+
+      // load the beers
+      this.fetchBeers()
       
     },
 
     methods: {
-      
+
+      async fetchBeers(id){
+        if (!this.properties.id){
+          return;
+        }
+        const beers = await api.getBeersFromBrewery(id || this.properties.id);
+        this.featuredBeers.length = 0;
+        this.featuredBeers.push(...beers);
+      }
+
     },
 
     computed: {
       properties(){
         return (this.feature || {}).properties || this.feature || {};
+      }
+    },
+
+    watch: {
+      'properties.id'(newVal){
+        // make sure to fetch beers each time a new brewery is identified
+        this.featuredBeers.length = 0;
+        this.fetchBeers(newVal);
       }
     }
   }
