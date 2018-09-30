@@ -59,6 +59,12 @@ echo "installed Flask-CORS"
 pip install Flask-SQLAlchemy
 echo "installed Flask-SQLAlchemy"
 
+pip install Pillow
+echo "installed Pillow (PIL)"
+
+pip install git+https://github.com/Infinidat/munch.git
+echo "installed munch"
+
 pip install git+https://github.com/GeospatialPython/pyshp.git
 echo "installed shapefile"
 
