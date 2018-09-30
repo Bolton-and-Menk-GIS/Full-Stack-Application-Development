@@ -112,17 +112,18 @@ def create_user():
     try:
         args['password'] = base64.b64decode(args.get('password'))
     except:
-        pass
+        # in case not passed in as base64
+        args['password'] = args.get('password')
     activation_url = args.get('activation_url')
     if 'activation_url' in args:
         del args['activation_url']
-    print(args)
-    # try:
-    user = userStore.create_user(**args)
-    # send_authentication_email(user.email, activation_msg.format(activation_url.format(id=user.id)))
-    return success('successfully created user: {}'.format(args.get('username')), activation_url=activation_url.format(id=user.id))
-    # except:
-    #     raise CreateUserError
+
+    try:
+        user = userStore.create_user(**args)
+        send_authentication_email(user.email, activation_msg.format(activation_url.format(id=user.id)))
+        return success('successfully created user: {}'.format(args.get('username')), activation_url=activation_url.format(id=user.id))
+    except:
+        raise CreateUserError
 
 @security_api.route('/users/<id>/activate', methods=['POST'])
 def activate_user(id):

@@ -13,7 +13,8 @@
       <hr>
       <p>{{ properties.address }}</p>
       <p>{{ properties.city }}, {{ properties.state }} {{ properties.zip }}</p>
-      <b-link :href="properties.website" target="_blank" v-if="properties.website">view website</b-link>
+      <b-link :href="properties.website" target="_blank" v-if="properties.website">website</b-link> | 
+      <b-link :href="directionsUrl" target="_blank" v-if="directionsUrl">directions</b-link>
 
       <!-- featured beers -->
       <div v-if="featuredBeers.length">
@@ -86,6 +87,10 @@
     computed: {
       properties(){
         return (this.feature || {}).properties || this.feature || {};
+      },
+
+      directionsUrl(){
+        return Object.keys(this.properties).length ? api.getDirectionsUrl(this.properties): null;
       }
     },
 

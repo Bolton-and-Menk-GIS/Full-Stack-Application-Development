@@ -7,7 +7,7 @@
       <!-- slot for sidebar content -->
       <!-- TYPEAHEAD WILL GO HERE -->
 
-      
+      <keep-alive>
 
         <!-- BREWERY IDENTIFY CONTENT -->
         <brewery-info
@@ -16,7 +16,7 @@
                 :feature="selectedBrewery">
         </brewery-info>
 
-      
+      </keep-alive>
 
     </sidebar>
 

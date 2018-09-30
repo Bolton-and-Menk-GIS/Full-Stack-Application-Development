@@ -224,7 +224,7 @@ def endpoint_query(table, fields=None, id=None, **kwargs):
     args = collect_args()
     for k,v in six.iteritems(kwargs):
         args[k] = v
-    return jsonify(query_wrapper(table, **args), fields)
+    return jsonify(to_json(query_wrapper(table, **args), fields))
 
 # toGeoJson() handler for breweries
 def toGeoJson(d):
