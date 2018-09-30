@@ -30,10 +30,22 @@ class InvalidResource(HTTPException):
     message = 'The requested resource is invalid, please check the request parameters and try again'
 
 
+class UsernameAlreadyExists(HTTPException):
+    code = 460
+    description = 'Username Already Exists'
+    message = 'The username supplied is already in use, please try a different name'
+
+
 class CreateUserError(HTTPException):
     code = 464
     description = 'Create User Error'
     message = 'Unable to create user, please check the input parameters and try again'
+    
+
+class SendAuthenticationEmailFailed(HTTPException):
+    code = 499
+    description = 'Send Authentication Email Failed'
+    message = 'Failed to the send authentication email'
 
 
 class UserNotFound(HTTPException):

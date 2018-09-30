@@ -494,51 +494,40 @@
 			"description": "",
 			"item": [
 				{
-					"name": "create user",
+					"name": "get users",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "Caleb Mackey",
-									"type": "text"
-								},
-								{
-									"key": "username",
-									"value": "calebma",
-									"type": "text"
-								},
-								{
-									"key": "email",
-									"value": "caleb.mackey@gmail.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "beerapp",
-									"type": "text"
-								}
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/users",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users"
 							]
 						},
-						"url": {
-							"raw": "localhost:5000/users/create",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"users",
-								"create"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "login test user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "38b01c7e-a202-4fdb-9da3-dc338801deb9",
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable('auth', jsonData.token);"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -573,6 +562,98 @@
 								"login"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "create user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Jane Doe",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "test_user2",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "user123",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/users/create",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "activate user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/users/2/activate",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users",
+								"2",
+								"activate"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "welcome auth test",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/users/welcome",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"users",
+								"welcome"
+							]
+						},
+						"description": ""
 					},
 					"response": []
 				}

@@ -323,7 +323,7 @@ Now that we know the data is successfully being passed, let's build the real tem
 
 * name 
 * address
-* link to website
+* link to website | directions to brewery
 
 Replace the `template` in `BreweryInfo.vue` with:
 
@@ -343,7 +343,8 @@ Replace the `template` in `BreweryInfo.vue` with:
       <hr>
       <p>{{ properties.address }}</p>
       <p>{{ properties.city }}, {{ properties.state }} {{ properties.zip }}</p>
-      <b-link :href="properties.website" target="_blank" v-if="properties.website">view website</b-link>
+      <b-link :href="properties.website" target="_blank" v-if="properties.website">view website</b-link> |
+      <b-link :href="directionsUrl" target="_blank" v-if="directionsUrl">directions</b-link>
 
       <!-- featured beers will go here -->
 
@@ -359,9 +360,33 @@ Replace the `template` in `BreweryInfo.vue` with:
 
 *Note: there is a **bonus feature** element included which is a `<span>` containing a font awesome pencil icon to allow authenticated users to edit the brewery.  Due to time constraints, this likely won't be covered in the workshop but code will be made available in the solution files*
 
+Everything should render in the template except for one thing we have not defined yet.  We modeled the directions like to a property called `directionsUrl`, but this does not exist yet.  When the user clicks on the `directions` link, we want to open Google Maps in another tab with directions from our current location to the brewery.  First we need to create a method to generate the url from feature attributes by trying the address info first, and if that does not exist pass in the lat/long. Add the code below to the `methods`:
+
+```js
+methods: {
+
+  getDirectionsUrl(feature){
+    const addr_parts = [feature.name, feature.address, feature.city, feature.state, feature.zip];
+
+    // form query url for google directions, try address first if has address city st zip else use x,y
+    const dest = addr_parts.every(f => !!f) ? addr_parts.join(' ').replace(/\s/g, '+'): `${feature.y},${feature.x}`;
+    return `https://www.google.com/maps/dir/Current+Location/${dest}`;
+  },
+```
+
+Next, add a computed property for the `directionsUrl` after the `properties` computed prop:
+
+```js
+directionsUrl(){
+  return Object.keys(this.properties).length ? this.getDirectionsUrl(this.properties): null;
+}
+```
+
 Save the changes and click on a brewery in the app to make sure it works correctly:
 
 ![brewery identify](images/sec_03/brewery_identify.PNG)
+
+Now test out both the `website` link and the `directions` to make sure they are working correctly.  
 
 That is all for this section, to add the *Featured Beers* for each brewery, continue on to the [next section](04_Add_Featured_Beers.md).
 
