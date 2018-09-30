@@ -61,7 +61,7 @@ typings/
 .next
 
 # python exclude
-*.pyc
+.pyc
 
 # sqlite db folder
 db/
