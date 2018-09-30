@@ -13,7 +13,8 @@
       <hr>
       <p>{{ properties.address }}</p>
       <p>{{ properties.city }}, {{ properties.state }} {{ properties.zip }}</p>
-      <b-link :href="properties.website" target="_blank" v-if="properties.website">view website</b-link>
+      <b-link :href="properties.website" target="_blank" v-if="properties.website">website</b-link> | 
+      <b-link :href="directionsUrl" target="_blank" v-if="directionsUrl">directions</b-link>
 
       <!-- featured beers -->
       <div v-if="featuredBeers.length">
@@ -72,6 +73,14 @@
 
     methods: {
 
+      getDirectionsUrl(feature){
+        const addr_parts = [feature.name, feature.address, feature.city, feature.state, feature.zip];
+
+        // form query url for google directions, try address first if has address city st zip else use x,y
+        const dest = addr_parts.every(f => !!f) ? addr_parts.join(' ').replace(/\s/g, '+'): `${feature.y},${feature.x}`;
+        return `https://www.google.com/maps/dir/Current+Location/${dest}`;
+      },
+
       async fetchBeers(id){
         if (!this.properties.id){
           return;
@@ -86,6 +95,10 @@
     computed: {
       properties(){
         return (this.feature || {}).properties || this.feature || {};
+      },
+
+      directionsUrl(){
+        return Object.keys(this.properties).length ? this.getDirectionsUrl(this.properties): null;
       }
     },
 
