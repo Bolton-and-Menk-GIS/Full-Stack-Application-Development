@@ -73,6 +73,14 @@
 
     methods: {
 
+      getDirectionsUrl(feature){
+        const addr_parts = [feature.name, feature.address, feature.city, feature.state, feature.zip];
+
+        // form query url for google directions, try address first if has address city st zip else use x,y
+        const dest = addr_parts.every(f => !!f) ? addr_parts.join(' ').replace(/\s/g, '+'): `${feature.y},${feature.x}`;
+        return `https://www.google.com/maps/dir/Current+Location/${dest}`;
+      },
+
       async fetchBeers(id){
         if (!this.properties.id){
           return;
@@ -90,7 +98,7 @@
       },
 
       directionsUrl(){
-        return Object.keys(this.properties).length ? api.getDirectionsUrl(this.properties): null;
+        return Object.keys(this.properties).length ? this.getDirectionsUrl(this.properties): null;
       }
     },
 
