@@ -477,7 +477,9 @@ The link should take you here:
 ![activate](images/sec_07/activate.PNG)
 
 And visiting this page after already activating should present:
-![activate](images/sec_07/already_activated)
+
+![activate](images/sec_07/already_activated.PNG)
 
 Clicking the button should successfully activate your account and take you back to the `Home` page.  That is all for this section, please continue to the [next section](08_Export_Data.md) to add the data export functionality.
+
 
