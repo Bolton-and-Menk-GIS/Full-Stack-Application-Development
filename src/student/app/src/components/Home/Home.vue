@@ -5,7 +5,7 @@
     <sidebar ref="sidebar" @toggled="handleExpand">
 
       <!-- slot for sidebar content -->
-      <!-- TYPEAHEAD WILL GO HERE -->
+      <typeahead v-if="menuActive" />
 
       <keep-alive>
 
@@ -33,14 +33,16 @@
 <script>
   import MapView from './MapViewMglv';
   import Sidebar from './Sidebar';
-  import BreweryInfo from './BreweryInfo'
+  import BreweryInfo from './BreweryInfo';
+  import Typeahead from './Typeahead';
 
   export default {
     name: "home",
     components: {
       MapView,
       Sidebar,
-      BreweryInfo
+      BreweryInfo,
+      Typeahead
     },
 
     data(){
