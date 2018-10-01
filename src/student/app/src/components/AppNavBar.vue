@@ -37,6 +37,7 @@
 <script>
   import { EventBus } from '../modules/EventBus';
   import LoginPage from './Home/LoginPage';
+  import api from '../modules/api';
 
   export default {
     name: "app-nav-bar",
