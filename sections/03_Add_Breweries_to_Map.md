@@ -644,7 +644,7 @@ import { EventBus } from '../../modules/EventBus';
 
 Now save the changes and test the auto search by clicking on the menu button in the app:
 
-![menu button](icons/sec_03/menu_button.PNG)
+![menu button](images/sec_03/menu_button.PNG)
 
 That is all for this section, to add the *Featured Beers* for each brewery, continue on to the [next section](04_Add_Featured_Beers.md).  
 
