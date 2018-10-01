@@ -343,7 +343,7 @@ Replace the `template` in `BreweryInfo.vue` with:
       <hr>
       <p>{{ properties.address }}</p>
       <p>{{ properties.city }}, {{ properties.state }} {{ properties.zip }}</p>
-      <b-link :href="properties.website" target="_blank" v-if="properties.website">view website</b-link> |
+      <b-link :href="properties.website" target="_blank" v-if="properties.website">website</b-link> |
       <b-link :href="directionsUrl" target="_blank" v-if="directionsUrl">directions</b-link>
 
       <!-- featured beers will go here -->
@@ -386,8 +386,266 @@ Save the changes and click on a brewery in the app to make sure it works correct
 
 ![brewery identify](images/sec_03/brewery_identify.PNG)
 
-Now test out both the `website` link and the `directions` to make sure they are working correctly.  
+Now test out both the `website` link and the `directions` to make sure they are working correctly. 
 
-That is all for this section, to add the *Featured Beers* for each brewery, continue on to the [next section](04_Add_Featured_Beers.md).
+### add auto complete search for breweries
+
+One useful feature we will implement now that the brewery identify functionality is working is to allow users to search for a brewery by name that will also support an auto complete list.  To accomplish this, we will want to bring in an npm module called [`vue-typeahead`](https://github.com/pespantelis/vue-typeahead). The functionality looks like this:
+
+![typeahead](images/sec_03/auto_complete_search.png)
+
+The first thing to do is to install it by opening a terminal window in VS Code and first change directory to the `student/JavaScript/app` folder and run the install command:
+
+```node
+cd src/student/JavaScript/app
+npm install vue-typeahead --save
+```
+
+The way the `VueTypeahead` module works is it is designed to be used as a [`mixin`] which allows any component that extends it to automatically inherit it's defined properties and methods.  We will create a component with a search input and as the user starts typing, the component will query the breweries looking for names that match the string via a wildcard search.  A request url as well as an http client need to be registered with the parent component via a `src` prop as per the [help docs](https://github.com/pespantelis/vue-typeahead).  
+
+The first thing to do after `vue-typeahead` is installed, is to define `axios` as the `$http` of the root Vue instance, as that is how the `VueTypeahead` mixin will access `axios`.  To do this, add the following line to the `main.js` file under where we registred the font-awesome-icon` component:
+
+```js
+// set $http property for typeahead component
+Vue.prototype.$http = axios;
+```
+
+Next, create a file called `Typeahead.vue` and place it in the `components/Home` folder.  Add the following `template`:
+
+```html
+<template>
+  <div class="Typeahead mt-3">
+    <i class="fa fa-spinner fa-spin input-icon" v-show="loading"></i>
+    <div>
+      <span v-show="isEmpty"><i class="fa fa-search input-icon"></i></span>
+      <span v-show="isDirty" @click="reset"><i class="fa fa-times input-icon"></i></span>
+    </div>
+
+    <b-form-input type="text"
+           class="typeahead-input mt-2 ml-2"
+           placeholder="Search for brewery"
+           autocomplete="off"
+           ref="input"
+           v-model="query"
+           @keydown.down="down"
+           @keydown.up="up"
+           @keydown.enter="hit"
+           @keydown.esc="reset"
+           @blur="reset"
+           @input="update"/>
+
+    <b-list-group v-show="hasItems" class="mt-1 search-results">
+      <b-list-group-item v-for="(item, $item) in items" :key="item.id"
+        :class="activeClass($item)"
+        @mousedown="hit"
+        @mousemove="setActive($item)">
+          <p class="brewery-name hit-result mb-2">{{ item.name }}</p>
+          <p class="hit-result mb-1">{{ item.city }}, {{ item.state }}</p>
+      </b-list-group-item>
+
+    </b-list-group>
+  </div>
+</template>
+```
+
+The `VueTypeahead` mixin has a few properties that will help with the auto complete search functionality:
+
+* `isEmpty` - the request to query our breweries did not return any results, or nothing has been typed yet in the search bar
+* `isDirty` - there is search criteria in the search bar
+* `loading` - there is currently a request to find matches
+* `items` - array of search results
+
+For the `template` a spinner is shown in the right side of the `<input>` search bar while a request is being made.  Next, the actual input is defined and modeled to the mixin's `query` prop.  At the bottom, a Bootstrap-Vue [`b-list-group`](https://bootstrap-vue.js.org/docs/components/list-group) component is added to store the search results.  Within this, items are shown using the `v-for` directive and will show the brewery `name` as well as the `city` and `state`. 
+When the user clicks on a result, the `setActive()` method (we will create this in a moment) to emit an event to notifiy the `MapViewMglv.vue` component that the user picked a brewery from the search results list, and we will set that brewery to the `selectedBrewery` property of the `Home.vue` component when by calling the `handleIdentify()` method.  By doing that, it will trigger the functionality we already set up to display the brewery in the `BreweryInfo` component.
+
+Next add the JavaScript code to handle the behavior:
+
+```html
+<script>
+  import { EventBus } from "../../modules/EventBus";
+  import VueTypeahead from 'vue-typeahead';
+
+  export default {
+    mixins: [VueTypeahead],
+    data () {
+      return {
+        data: {
+          wildcards: 'name'
+
+        },
+        queryParamName: 'name',
+        limit: 10,
+        minChars: 2
+      }
+    },
+    mounted(){
+      // focus on input
+      this.$nextTick(() => this.$refs.input.focus());
+    },
+
+    computed: {
+        src(){
+          return `${this.$root.config.api_base}/breweries`
+        }
+    },
+
+    methods: {
+      onHit (item) {
+        console.log('onHit: ', item);
+        EventBus.$emit('brewery-search-result', {
+          type: 'Feature',
+          properties: item,
+          geometry: {
+            coordinates: [
+              item.x,
+              item.y]
+          }
+        });
+      }
+    }
+  }
+</script>
+```
+
+In the above we are:
+
+1. importing the `VueTypahead` module and defining it as a mixin
+2. setting a data property to store a `wildcard` property set to name, which will be added to the `/breweries` query to our REST API.
+3. Focusing the search box when the component is mounted
+4. setting a computed property to fetch the correct url to the `/breweries` query based on the `api_base` property set in the JavaScript app's `config.json` file.
+5. creating the `onHit()` method, which will be the event handler for emiting a `brewery-search-result` event when the user clicks on a result.
+
+Finally, add some css to style the component:
+
+```html
+<style scoped>
+  .Typeahead {
+    position: relative;
+  }
+
+  .typeahead-input {
+    width: 95%;
+    font-size: 14px;
+    text-align: center;
+    /*color: #2c3e50;*/
+    color: black !important;
+    line-height: 1.42857143;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,.4);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    font-weight: 300;
+    padding: 12px 26px;
+    border: none;
+    border-radius: 22px;
+    letter-spacing: 1px;
+    box-sizing: border-box;
+  }
+
+  .hit-result {
+    color: black;
+  }
+
+  .search-results > div.list-group-item {
+    cursor: pointer;
+  }
+
+  .brewery-name {
+    font-weight: bold;
+  }
+
+  .typeahead-input:focus {
+    border-color: #4fc08d;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px #4fc08d;
+  }
+
+  .input-icon{
+    cursor: pointer;
+    position: absolute;
+    top: 0.75rem;
+    right: 1.5rem;
+    color: lightgray;
+  }
+
+  .active {
+    background-color: #3aa373 !important;
+  }
+
+  .active > p {
+    color: white;
+  }
+
+  .name {
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .screen-name {
+    font-style: italic;
+  }
+</style>
+```
+
+Save the changes to the `Typeahead.vue` file.  Next, we need to go into the `Home.vue` file to add our `Typeahead.vue` component.  First, we need to import it:
+
+```js
+import Typeahead from './Typeahead';
+```
+
+Then add it to the `components` property:
+
+```js
+components: {
+  MapView,
+  Sidebar,
+  BreweryInfo,
+  Typeahead
+},
+```
+
+Then add it to the `template` (replace the `<sidebar> tag with this):
+```html
+<!-- sidebar -->
+<sidebar ref="sidebar" @toggled="handleExpand">
+
+  <!-- slot for sidebar content -->
+  <typeahead v-if="menuActive" />
+
+  <keep-alive>
+
+    <!-- BREWERY IDENTIFY CONTENT -->
+    <brewery-info
+            v-if="identifyActive"
+            :userIsAuthenticated="userIsAuthenticated"
+            :feature="selectedBrewery">
+    </brewery-info>
+
+  </keep-alive>
+
+</sidebar>
+```
+
+Notice that the `<typeahead>` component uses a `v-if` directive to only show up if the the `menuActive` data property is set to `true`.  Save the chagnes to the `Home.vue` file.
+
+Finally, navigate to the `MapViewMglv.vue` component and add the following code to the `mounted()` method:
+
+```js
+// event handler for autocomplete typeahead from menu search
+EventBus.$on('brewery-search-result', (feature)=>{
+  this.handleIdentify(feature, true);
+});
+```
+
+Because the `MapViewMglv.vue` component is not a direct parent of the `Typeahead.vue` component, it is easiest to listen to the `brewery-search-result` event it emits by subscribing to the `EventBus`.  To use it, we just need to import it to this file:
+
+```js
+import { EventBus } from '../../modules/EventBus';
+```
+
+Now save the changes and test the auto search by clicking on the menu button in the app:
+
+![menu button](icons/sec_03/menu_button.PNG)
+
+That is all for this section, to add the *Featured Beers* for each brewery, continue on to the [next section](04_Add_Featured_Beers.md).  
 
 
