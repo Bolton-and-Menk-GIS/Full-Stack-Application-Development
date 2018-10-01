@@ -82,9 +82,6 @@
       },
 
       async fetchBeers(id){
-        if (!this.properties.id){
-          return;
-        }
         const beers = await api.getBeersFromBrewery(id || this.properties.id);
         this.featuredBeers.length = 0;
         this.featuredBeers.push(...beers);

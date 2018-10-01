@@ -7,13 +7,18 @@ import BootstrapVue from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import '@fortawesome/fontawesome-free/js/all';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import Spinner from './components/UI/Spinner';
 
 // use Bootstrap-Vue and Vuelidate
 Vue.use(BootstrapVue);
 
 // register these components globally
 Vue.component('font-awesome-icon', FontAwesomeIcon);
+Vue.component('spinner', Spinner);
+
+// set $http property for typeahead component
+Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false;
 

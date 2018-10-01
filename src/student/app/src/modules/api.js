@@ -24,6 +24,61 @@ const api = {
     return `${axios.defaults.baseURL}/beer/photos/${photo_id}/download${cacheBust ? '?cb=' + new Date().getTime(): ''}`;
   },
 
+  async login(usr, pw, remember_me=false){
+    
+    const resp = await request('/users/login', {
+      method: 'post',
+      username: usr,
+      password: btoa(pw),
+      remember: remember_me
+    });
+    if ('token' in resp){
+      api.token = resp.token;
+      axios.defaults.headers.common.Authorization = resp.token;
+      console.log('LOGIN RESPONSE: ', resp);
+    }
+    return resp;
+  },
+
+  async logout(){
+    const response = await request('/users/logout', {method: 'post'}, false);
+    console.log('FULL LOGOUT RESPONSE: ', response);
+    return response.data;
+  },
+
+  async fetchUsernames(){
+    const resp = await request('/users?fields=username');`create`
+    return resp.map(u => u.username);
+  },
+
+  async userIsActive(id){
+    const resp = await request(`/users/${id}?fields=username,active,id`);
+    return resp.active === 'True'; // stored as string in db
+  },
+
+  createUser({name, email, username, password, activation_url=default_activation_url } = {}){
+    return request('/users/create', {
+      method: 'post',
+      data: {
+        name: name,
+        email: email,
+        username: username,
+        password: btoa(password),
+        activation_url: activation_url
+      }
+    });
+
+  },
+
+  activate(id){
+    return request(`/users/${id}/activate`, { method: 'post' });
+  },
+
+  authTest(){
+    return request('/users/welcome');
+  },
+
+
 }
 
 export default api;
