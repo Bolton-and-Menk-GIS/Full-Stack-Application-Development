@@ -52,8 +52,8 @@ const api = {
   },
 
   async userIsActive(id){
-    const resp = await request(`/users/${id}?fields=username,active,id`);
-    return resp.active === 'True'; // stored as string in db
+    const resp = await request(`/users/${id}?fields=username,activated,id`);
+    return resp.activated === 'True'; // stored as string in db
   },
 
   createUser({name, email, username, password, activation_url=default_activation_url } = {}){

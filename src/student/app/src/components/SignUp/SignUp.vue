@@ -2,23 +2,30 @@
   <div class="jumbotron signup-container mb-0">
     <h3 class="theme">Sign Up for Brewery Finder</h3>
     <b-card class="mx-auto p-4 signup-card">
-      <div class="signup-form" v-if="state === 'default'">
+      <b-form class="signup-form" v-if="state === 'default'" @submit="submit">
         <b-form-group label="Name:" label-text-align="left">
           <b-form-input type="text"
                         v-model.trim="name"
-                        />
+                        :state="!$v.name.$invalid"
+                        aria-describedby="nameRequired"/>
+          <b-form-invalid-feedback id="nameRequired">
+            Name is Required
+          </b-form-invalid-feedback>
         </b-form-group>
 
         <b-form-group label="Email:" label-text-align="left">
           <b-form-input type="email"
                         v-model.trim="email"
-                        :state="validEmail"
+                        :state="!$v.email.$invalid"
                         aria-describedby="invalidEmail"/>
           <b-form-invalid-feedback id="invalidEmail">Invalid email address</b-form-invalid-feedback>
         </b-form-group>
 
         <b-form-group label="Username:" label-text-align="left">
-          <b-form-input type="text" v-model.trim="username" :state="username.length >= 5 && !usernameTaken" aria-describedby="tooShort"/>
+          <b-form-input type="text" 
+            v-model.trim="username" 
+            :state="!$v.username.$invalid" 
+            aria-describedby="tooShort"/>
           <b-form-invalid-feedback id="tooShort">{{ invalidUsernameFeedback }}</b-form-invalid-feedback>
         </b-form-group>
 
@@ -26,7 +33,7 @@
           <b-form-input type="password"
                         v-model.trim="password"
                         aria-describedby="strongFeedback"
-                        :state="strongPassword"/>
+                        :state="!$v.password.$invalid"/>
           <b-form-invalid-feedback id="strongFeedback">Password must be at least 8 characters long and contain letters and numbers</b-form-invalid-feedback>
         </b-form-group>
 
@@ -34,13 +41,13 @@
           <b-form-input type="password"
                         v-model.trim="passwordVerify"
                         aria-describedby="retypeFeedback"
-                        :state="passwordsMatch" />
+                        :state="!$v.passwordVerify.$invalid" />
           <b-form-invalid-feedback id="retypeFeedback">Passwords do not match</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-btn class="theme mt-2" @click="submit">Sign Up</b-btn>
+        <b-btn class="theme mt-2" :disabled="!formIsValid">Sign Up</b-btn>
         <b-btn variant="danger mt-2 ml-4 bold" @click="$router.push({name: 'home'})">Cancel</b-btn>
-      </div>
+      </b-form>
 
       <!-- LOADING SPINNER -->
       <spinner :visible="state === 'loading'"  text="One moment please..."/>
@@ -52,7 +59,7 @@
       </div>
 
       <div class="error" v-if="state === 'error'">
-        <b-alert :show="2" @dismissed="state = 'default'" variant="danger">Failed to create user, please try again.</b-alert>
+        <b-alert :show="1" @dismissed="state = 'default'" variant="danger">Failed to create user, please try again.</b-alert>
       </div>
 
     </b-card>
@@ -61,45 +68,68 @@
 </template>
 
 <script>
-  import Spinner from '../UI/Spinner';
   import api from '../../modules/api';
   import { validationMixin } from "vuelidate"
+  import { helpers, required, minLength, sameAs, email } from "vuelidate/lib/validators"
+
+  // custom validators
+  const strongPassword = helpers.regex('strongPassword', /^(((?=.*[a-z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})/);
+
+  const usernameNotTaken = (value, vm) => {
+    return !vm.usernames.includes(value);
+  }
 
   export default {
     name: "sign-up",
     mixins: [
       validationMixin
     ],
-    components: {
-      Spinner
-    },
+    
     async beforeMount(){
       this.usernames = await api.fetchUsernames();
     },
-    mounted(){hook.su = this},
+
     data(){
       return {
         usernames: [],
-        name: null,
+        name: '',
         username: '',
         password: '',
         passwordVerify: '',
         email: '',
-        weakPassword: '',
-        state: 'default'
+        state: 'default',
       }
     },
-    methods: {
-      testStrength(s=''){
-        const medStrength = new RegExp("^(((?=.*[a-z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{8,})");
-        return medStrength.test(s);
+
+    validations: {
+      name: {
+        required
       },
 
-      testEmail(s=''){
-        // http://emailregex.com/
-        const emailTest = new RegExp('^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$');
-        return emailTest.test(s);
+      email: {
+        required,
+        email
       },
+
+      username: {
+        required,
+        minLength: minLength(5),
+        usernameNotTaken // custom validator!
+      },
+
+      password: {
+        required,
+        strongPassword // custom validator!
+      },
+
+      passwordVerify: {
+        required,
+        sameAsPassword: sameAs('password')
+      }
+
+    },
+
+    methods: {
 
       async submit(){
         this.state = 'loading';
@@ -123,25 +153,11 @@
         }
       }
     },
+
     computed: {
-      passwordsMatch(){
-        return (this.password || '').length >= 8 && this.password === this.passwordVerify;
-      },
-
-      validEmail(){
-        return this.testEmail(this.email || '');
-      },
-
-      strongPassword(){
-        return this.testStrength(this.password || '');
-      },
 
       invalidUsernameFeedback(){
         return this.usernameTaken ? `"${this.username}" is already taken`: 'Username must be at least 5 characters';
-      },
-
-      usernameTaken(){
-        return this.usernames.includes(this.username);
       },
 
       activationUrl(){
@@ -149,6 +165,10 @@
         return `${urlParts.slice(0, urlParts.length-1).join('/')}/users/{id}/activate`;
       },
 
+      formIsValid(){
+        // disable button until everything is valid
+        return [!this.$v.name.$invalid, !this.$v.username.$invalid, !this.$v.email.$invalid, !this.$v.password.$invalid, !this.$v.passwordVerify.$invalid].every(f => !!f);
+      }
 
     }
   }
@@ -171,6 +191,5 @@
       width: 50%;
     }
   }
-
 
 </style>

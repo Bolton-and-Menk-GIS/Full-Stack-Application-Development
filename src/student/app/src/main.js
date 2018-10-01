@@ -9,9 +9,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import '@fortawesome/fontawesome-free/js/all';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Spinner from './components/UI/Spinner';
+import Vuelidate from 'vuelidate';
 
 // use Bootstrap-Vue and Vuelidate
 Vue.use(BootstrapVue);
+Vue.use(Vuelidate);
 
 // register these components globally
 Vue.component('font-awesome-icon', FontAwesomeIcon);

@@ -25,7 +25,7 @@
     <b-modal id="logout-modal" v-model="showLogout" :hide-footer="true">
       <div class="logout-container">
         <spinner :text="'Logging Out'" :visible="state === 'logging_out'" />
-        <b-alert :show="2" v-if="state === 'logged_out'" @dismissed="showLogout = false" variant="success">Successfully Logged Out</b-alert>
+        <b-alert :show="1" v-if="state === 'logged_out'" @dismissed="showLogout = false" variant="success">Successfully Logged Out</b-alert>
       </div>
     </b-modal>
 
@@ -84,7 +84,7 @@
 
         // for some reason the modal dismiss was causing a race condition and interfering with the router...
         setTimeout(()=>{
-          this.$router.push('/sign-up');
+          this.$router.push({name: 'signup'});
         }, 100)
       },
 
