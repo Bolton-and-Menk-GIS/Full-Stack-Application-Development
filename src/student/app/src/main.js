@@ -15,6 +15,9 @@ Vue.use(BootstrapVue);
 // register these components globally
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+// set $http property for typeahead component
+Vue.prototype.$http = axios;
+
 Vue.config.productionTip = false;
 
 // wait for config to load before initializing Vue instance
