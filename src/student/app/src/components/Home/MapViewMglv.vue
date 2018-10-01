@@ -31,6 +31,7 @@
   import Mapbox from 'mapbox-gl-vue';
   import { createControlButton } from '../../modules/MenuButtonControl';
   import api from '../../modules/api';
+  import { EventBus } from '../../modules/EventBus';
 
   export default {
     name: "map-view-mglv",
@@ -46,6 +47,12 @@
     },
     mounted(){
       console.log('MOUNTED MAP VIEW: ', this);
+
+      // event handler for autocomplete typeahead from menu search
+      EventBus.$on('brewery-search-result', (feature)=>{
+        this.handleIdentify(feature, true);
+      });
+
     },
 
     methods: {
