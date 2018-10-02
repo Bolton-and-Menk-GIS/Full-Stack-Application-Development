@@ -213,8 +213,6 @@ def create_item(tablename):
 @login_required
 def update_item(tablename, id):
     table = table_dict.get(tablename)
-    if not table and tablename == 'beer_photos':
-        table = BeerPhotos
     if table:
         obj = get_object(table, id=id)
         if not obj:
@@ -238,8 +236,6 @@ def update_item(tablename, id):
 @login_required
 def delete_item(tablename, id):
     table = table_dict.get(tablename)
-    if tablename == 'beer_photos':
-        table = BeerPhotos
     if table:
         obj = get_object(table, id=id)
         if not obj:
