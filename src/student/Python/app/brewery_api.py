@@ -143,3 +143,98 @@ def export_table_data(tablename):
                        filename=os.path.basename(outfile),
                        url=url_for('static', filename=os.path.basename(outfile), _external=True))
     raise InvalidResource
+
+
+# EDITING API BELOW
+
+@brewery_api.route('/data/<tablename>/create', methods=['POST'])
+@login_required
+def create_item(tablename):
+
+    table = table_dict.get(tablename)
+    if not table and tablename == 'beer_photos':
+        table = BeerPhotos
+    if table:
+        args = collect_args()
+        if current_user:
+            args['created_by'] = current_user.id
+
+        # check if related feature (Beer, etc)
+        obj = None
+        if tablename == 'beers' and 'brewery_id' in args:
+            # must get brewery first
+            brewery = get_object(table_dict['breweries'], id=args['brewery_id'])
+            if not brewery:
+                return dynamic_error(description='Missing Brewery Information',
+                                     message='A "brewery_id" is required in order to create a new beer')
+
+            # now that we have a valid brewery, create the new beer and append to the brewery "beers" attribute
+            del args['brewery_id']
+            obj = create_object(table, **args)
+            brewery.beers.append(obj)
+
+        elif tablename == 'beer_photos' and 'beer_id' in args:
+            # fetch beer parent first
+            beer = get_object(table_dict['beers'], id=args['beer_id'])
+            if not beer:
+                return dynamic_error(description='Missing Beer Information',
+                                     message='A "beer_id" is required in order to create a new beer photo')
+
+            # add to photos attribute
+            del args['beer_id']
+            if args.get('created_by'):
+                del args['created_by'] # forgot to add this field to the data 
+            obj = BeerPhotos(**create_beer_photo(**args))
+            beer.photos.append(obj)
+
+        elif tablename == 'styles' and 'cat_id' in args:
+            # fetch parent category first
+            category = get_object(Category, id=args.get('cat_id'))
+            return dynamic_error(description='Missing Category Information',
+                                     message='A "cat_id" (category ID) is required in order to create a new beer style')
+            del args['cat_id']
+            obj = create_object(Style, **args)
+            category.styles.append(obj)
+
+        else:
+            obj = create_object(table, **args)
+            session.add(obj)
+
+        if obj:
+            # commit database transaction if we have a valid object
+            session.commit()
+            return success('Successfully created new item in "{}"'.format(tablename), id=obj.id)
+        return dynamic_error(message='Missing parameters for creating a new {}'.format(tablename))
+
+    raise InvalidResource
+
+
+@brewery_api.route('/data/<tablename>/<id>/update', methods=['POST', 'PUT'])
+@login_required
+def update_item(tablename, id):
+    table = table_dict.get(tablename)
+    if table:
+        obj = get_object(table, id=id)
+        if not obj:
+            raise InvalidResource
+        args = collect_args()
+        update_object(obj, **args)
+        session.commit()
+        return success('Successfully updated item in "{}"'.format(tablename), id=obj.id)
+
+    raise InvalidResource
+
+@brewery_api.route('/data/<tablename>/<id>/delete', methods=['DELETE'])
+@login_required
+def delete_item(tablename, id):
+    table = table_dict.get(tablename)
+    if table:
+        obj = get_object(table, id=id)
+        if not obj:
+            raise InvalidResource
+        oid = obj.id
+        delete_object(obj)
+        session.commit()
+        return success('Successfully deleted item in "{}"'.format(tablename), id=oid)
+
+    raise InvalidResource

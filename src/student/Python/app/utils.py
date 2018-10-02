@@ -430,3 +430,47 @@ def remove_files(path, exclude=[], older_than=True, test=False, subdirs=False, p
     return
 
 
+def get_object(table, **kwargs):
+    """ fetches a single object (row) from a table
+
+    :param table: table to query
+    :param kwargs: filter params
+    :return: an instance of a single object from table
+    """
+    try:
+        return session.query(table).filter_by(**kwargs).first()
+    except:
+        return None
+
+
+def create_object(table, **kwargs):
+    """ creates a new record in the table
+
+    :param table: table for which to add record
+    :param kwargs: data for table record as json
+    :return: newly created table object
+    """
+    return table(**kwargs)
+
+
+def update_object(obj, **kwargs):
+    """ creates a new record in the table
+
+    :param obj: record from table
+    :param kwargs: data to update record with as json
+    :return: updated table object
+    """
+    for k,v in six.iteritems(kwargs):
+        setattr(obj, k, v)
+    return obj
+
+
+def delete_object(obj):
+    """ deletes a single object from table
+
+    :param obj: record from table
+    :return: id of deleted object
+    """
+    oid = obj.id
+    obj.delete() if hasattr(obj, 'delete') else session.delete(obj)
+    return oid
