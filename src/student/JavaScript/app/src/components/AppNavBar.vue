@@ -4,6 +4,13 @@
 
     <b-navbar-nav class="ml-auto">
 
+      <!-- ICON FOR DATA DOWNLOAD -->
+      <span v-if="userLoggedIn" v-b-modal.export-modal>
+        <i class="fas fa-external-link-alt mr-2 download-btn app-nav-btn"
+           title="export brewery data">
+        </i>
+      </span>
+
       <!-- ICON FOR HANDLING LOGIN -->
       <span @click="userLoggedIn ? logout(): showLoginModal = true"
             :title="`sign ${ userLoggedIn ? 'out': 'in' }`">
@@ -30,6 +37,7 @@
     </b-modal>
 
     <!-- PLACEHOLDER FOR EXPORT DATA MODAL -->
+    <export-data />
 
   </b-navbar>
 </template>
@@ -38,11 +46,13 @@
   import { EventBus } from '../modules/EventBus';
   import LoginPage from './Home/LoginPage';
   import api from '../modules/api';
+  import ExportData from './ExportData';
 
   export default {
     name: "app-nav-bar",
     components: {
-      LoginPage
+      LoginPage,
+      ExportData
     },
     data() {
       return {

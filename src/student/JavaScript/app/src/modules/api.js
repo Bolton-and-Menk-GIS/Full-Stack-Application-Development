@@ -78,6 +78,16 @@ const api = {
     return request('/users/welcome');
   },
 
+  async exportData({table='breweries', format='csv'}={}){
+    try {
+      return await request(`/data/${table}/export?f=${format}`, {
+        method: 'post'
+      });
+    } catch(err){
+      console.warn('export data failed: ', err);
+    }
+  },
+
 
 }
 

@@ -248,3 +248,185 @@ def toGeoJson(d):
             } for f in d
         ]
     }
+
+
+def export_data(table, fields=None, format='csv', **kwargs):
+    """ exports table to csv or shapefile (latter only supported with breweries table)
+
+    :param table: table to export
+    :param fields: fields to include in export
+    :param format: export type, defaults to csv (csv|shapefile)
+    :param kwargs: filter parameters
+    :return: download file, will be either a .csv file or .zip
+    """
+    # cleanup download directory by deleting files older than 30 minutes
+    remove_files(download_folder, minutes=30)
+
+    # get fields
+    fields = validate_fields(table, fields)
+
+    # allow shapefile export if table selected is breweries
+    if format.lower() == 'shapefile' and table.__tablename__ == 'breweries':
+        return export_to_shapefile(table, fields, **kwargs)
+
+    else:
+        # export data as csv
+        results = to_json(query_wrapper(table, fields=fields, **kwargs), fields)
+
+        # write csv file
+        csvFilePath = os.path.join(download_folder, '{}.csv'.format(get_timestamp(table.__tablename__)))
+
+        with open(csvFilePath, 'wb') as csvFile:
+            writer = csv.DictWriter(csvFile, fields)
+            writer.writeheader()
+            for result in results:
+                writer.writerow(result)
+
+        return csvFilePath
+
+
+def export_to_shapefile(table, fields=None, **kwargs):
+    """ exports records to a shapefile, only supported with breweries table
+
+    :param table: table object for breweries
+    :param fields: field list to export in shapefile
+    :param kwargs: query parameters to filter results
+    :return: a zip file containing shapefile contents
+    """
+    results = toGeoJson(to_json(query_wrapper(table, **kwargs), fields=fields))
+    features = results.get('features')
+    if not len(features):
+        return None
+
+    # field mapping schema
+    field_map = {
+        'id':  { 'type': 'N' },
+        'name': { 'type': 'C', 'size': '100' },
+        'address': { 'type': 'C', 'size': '100' },
+        'city': { 'type': 'C', 'size': '50' },
+        'state': { 'type': 'C', 'size': '2' },
+        'zip': { 'type': 'C', 'size': '11' },
+        'monday': { 'type': 'C', 'size': '30' },
+        'tuesday': {'type': 'C', 'size': '30'},
+        'wendesday': {'type': 'C', 'size': '30'},
+        'thursday': {'type': 'C', 'size': '30'},
+        'friday': {'type': 'C', 'size': '30'},
+        'saturday': {'type': 'C', 'size': '30'},
+        'sunday': {'type': 'C', 'size': '30'},
+        'comments': {'type': 'C', 'size': '255'},
+        'brew_type': { 'type': 'C', 'size': '50' },
+        'website': {'type': 'C', 'size': '255' },
+        'x': { 'type': 'F' },
+        'y': {'type': 'F'},
+    }
+
+    # create output folder for zipping up shapefile
+    basename = get_timestamp(table.__tablename__)
+    folder = os.path.join(download_folder, basename)
+    output = os.path.join(folder, basename)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    # build schema based on first record
+    first = features[0].get('properties', {})
+    field_list = filter(lambda f: f in field_map and f in first, list_fields(table))
+
+    # open shapefile writer
+    with shapefile.Writer(output, 1) as w:
+
+        # add fields
+        for field in field_list:
+            # get field definition
+            fd = field_map.get(field, {})
+
+            # specify name, type, field size, decimal size
+            w.field(field, fd.get('type'), fd.get('size', '50'), 6 if fd.get('type') == 'F' else 0)
+
+        # add features
+        for feature in features:
+            # write geometry first (accepts geojson)
+            w.shape(feature.get('geometry'))
+
+            # write attributes, filter by queried fields only
+            w.record(**{f: feature.get('properties', {}).get(f) for f in field_list })
+
+    # write .prj file with WGS 1984 coordinate info
+    prj = os.path.join(folder, basename + '.prj')
+    with open(prj, 'w') as f:
+        f.write(WGS_1984)
+
+    # zip all files for shapefile
+    shutil.make_archive(folder, 'zip', folder)
+    try:
+        shutil.rmtree(folder)
+    except:
+        pass
+    return folder + '.zip'
+
+
+def remove_files(path, exclude=[], older_than=True, test=False, subdirs=False, pattern='*', **kwargs):
+    """ removes old folders within a datetime.timedelta from now
+
+    :param path: root directory to delete files from
+    :param exclude: list of folders to skip over (supports wildcards). These directories will not be removed.
+    :param older_than: option to remove all files older than a certain amount of days. Default is True.  If False, will
+            remove all before the specified timedelta
+    :param test: If True, performs a dry run to print out the mock results and does not actually delete files.
+    :param subdirs: option to iterate through all sub-directories. Default is False.
+    :param pattern: wildcard to match name scheme for files to delete, default is "*"
+    :param kwargs: keyword arguments for time delta (days|months|years|weeks|hours|minutes|seconds)
+    :return:
+    """
+    # if not kwargs, default to delete things older than one day
+    deltas = ['days', 'months', 'years', 'weeks', 'hours', 'minutes', 'seconds']
+    time_args = {}
+    for k,v in kwargs.iteritems():
+        if k in deltas:
+            time_args[k] = v
+    if not time_args:
+        time_args['days'] = 1
+
+    # get removal date and operator
+    remove_after = datetime.datetime.now() - datetime.timedelta(**time_args)
+    op = operator.lt
+    if not older_than:
+        op = operator.gt
+
+    # optional test
+    if test:
+        def remove(*args): pass
+    else:
+        def remove(*args):
+            os.remove(args[0])
+
+    # walk thru directory
+    for root, dirs, files in os.walk(path):
+        if not root.endswith('.gdb'):
+            for f in files:
+                if not f.lower().endswith('.lock') and fnmatch.fnmatch(f, pattern):
+                    if not any(map(lambda ex: fnmatch.fnmatch(f, ex), exclude)):
+                        last_mod = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(root, f)))
+
+                        # check date
+                        if op(last_mod, remove_after):
+                            try:
+                                remove(os.path.join(root, f))
+                                print('deleted: "{0}"'.format(os.path.join(root, f)))
+                            except:
+                                print('\nCould not delete: "{0}"!\n'.format(os.path.join(root, f)))
+                        else:
+                            print('skipped: "{0}"'.format(os.path.join(root, f)))
+                    else:
+                        print('excluded: "{0}"'.format(os.path.join(root, f)))
+                else:
+                    print('skipped file: "{0}"'.format(os.path.join(root, f)))
+        else:
+            print('excluded files in: "{0}"'.format(root))
+
+        # break or continue if checking sub-directories
+        if not subdirs:
+            break
+
+    return
+
+

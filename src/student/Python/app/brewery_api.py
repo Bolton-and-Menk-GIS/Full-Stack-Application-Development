@@ -17,6 +17,14 @@ beer_photo_fields = [f for f in list_fields(BeerPhotos) if f != 'data']
 config = load_config()
 PHOTO_STORAGE_TYPE = config.get('photo_storage_type', 'database')
 
+# json object to lookup Table objects by name
+table_dict = {
+    'breweries': Brewery,
+    'beers': Beer,
+    'styles': Style,
+    'categories': Category
+}
+
 # API METHODS BELOW
 
 @brewery_api.route('/breweries')
@@ -98,6 +106,7 @@ def get_category_styles(id):
 def get_styles(id=None):
     return endpoint_query(Style, id=id, **collect_args())
 
+
 @brewery_api.route('/beer/photos/<id>/download')
 def download_beer_photo(id):
     if not id:
@@ -112,3 +121,25 @@ def download_beer_photo(id):
         to_send = BytesIO(beer_photo.data)
     return send_file(to_send, attachment_filename=beer_photo.photo_name, as_attachment=True)
 
+
+@brewery_api.route('/data/<tablename>/export', methods=['POST'])
+@login_required
+def export_table_data(tablename):
+    table = table_dict.get(tablename)
+    print(tablename, table)
+    if table:
+        args = collect_args()
+        fields = args.get('fields')
+        f = args.get('f')
+        if f:
+            del args['f']
+        else:
+            f = 'csv'
+        if fields:
+            del args['fields']
+
+        outfile = export_data(table, fields, f, **args)
+        return success('successfully exported data',
+                       filename=os.path.basename(outfile),
+                       url=url_for('static', filename=os.path.basename(outfile), _external=True))
+    raise InvalidResource
