@@ -660,6 +660,100 @@
 			]
 		},
 		{
+			"name": "data",
+			"description": "Operations for working with data, these all require the user to be logged in",
+			"item": [
+				{
+					"name": "export data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "f",
+									"value": "csv",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "f",
+									"value": "shapefile",
+									"description": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/breweries/export",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"breweries",
+								"export"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "export data as shapefile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "f",
+									"value": "csv",
+									"description": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "f",
+									"value": "shapefile",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/breweries/export",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"breweries",
+								"export"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "endpoints",
 			"request": {
 				"method": "GET",
