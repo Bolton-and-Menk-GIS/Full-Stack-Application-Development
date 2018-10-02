@@ -56,7 +56,7 @@ class Beer(Base):
     alc = Column(Float, default=None)
     ibu = Column(Integer, default=None)
     color = Column(String(25), default=None)
-    photos = relationship(BeerPhotos)
+    photos = relationship(BeerPhotos, cascade="all, delete-orphan")
     created_by = Column(Integer, ForeignKey('users.id'))
     brewery = relationship('Brewery', back_populates='beers')
     user = relationship('User', back_populates='submitted_beers')
@@ -87,7 +87,7 @@ class Brewery(Base):
     y = Column(Float)
     created_by = Column(Integer, ForeignKey('users.id'))
     user = relationship('User', back_populates='submitted_breweries')
-    beers = relationship('Beer', back_populates='brewery')
+    beers = relationship('Beer', back_populates='brewery', cascade="all, delete-orphan")
 
     def __repr__(self):
         return basic_repr(self, 'name')
@@ -110,7 +110,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     cat_name = Column(String(100), nullable=False)
     last_mod = Column(DateTime, default=datetime.utcnow())
-    styles = relationship('Style', back_populates='category')
+    styles = relationship('Style', back_populates='category', cascade="all, delete-orphan")
 
     def __repr__(self):
         return basic_repr(self, 'cat_name')

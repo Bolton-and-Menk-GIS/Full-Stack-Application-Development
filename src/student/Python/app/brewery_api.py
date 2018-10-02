@@ -22,7 +22,8 @@ table_dict = {
     'breweries': Brewery,
     'beers': Beer,
     'styles': Style,
-    'categories': Category
+    'categories': Category,
+    'beer_photos': BeerPhotos
 }
 
 # API METHODS BELOW
@@ -125,6 +126,8 @@ def download_beer_photo(id):
 @brewery_api.route('/data/<tablename>/export', methods=['POST'])
 @login_required
 def export_table_data(tablename):
+    if tablename == 'beer_photos':
+        return dynamic_error(message='data export is not available for beer photos')
     table = table_dict.get(tablename)
     print(tablename, table)
     if table:
@@ -152,8 +155,6 @@ def export_table_data(tablename):
 def create_item(tablename):
 
     table = table_dict.get(tablename)
-    if not table and tablename == 'beer_photos':
-        table = BeerPhotos
     if table:
         args = collect_args()
         if current_user:
@@ -173,18 +174,17 @@ def create_item(tablename):
             obj = create_object(table, **args)
             brewery.beers.append(obj)
 
-        elif tablename == 'beer_photos' and 'beer_id' in args:
+        elif tablename == 'beer_photos' and 'beer_id' in args and 'photo' in args:
             # fetch beer parent first
-            beer = get_object(table_dict['beers'], id=args['beer_id'])
-            if not beer:
-                return dynamic_error(description='Missing Beer Information',
-                                     message='A "beer_id" is required in order to create a new beer photo')
-
-            # add to photos attribute
-            del args['beer_id']
-            if args.get('created_by'):
-                del args['created_by'] # forgot to add this field to the data 
-            obj = BeerPhotos(**create_beer_photo(**args))
+            try:
+                beer = query_wrapper(Beer, id=args.get('beer_id'))[0]
+            except:
+                return dynamic_error(description='Missing Beer ID', message='A Beer ID is required for submitting a photo')
+            photo_blob = args.get('photo')
+            try:
+                obj = table(**create_beer_photo(data=photo_blob.stream.read(), photo_name=photo_blob.filename))
+            except Exception as e:
+                return dynamic_error(message=str(e))
             beer.photos.append(obj)
 
         elif tablename == 'styles' and 'cat_id' in args:
@@ -213,12 +213,22 @@ def create_item(tablename):
 @login_required
 def update_item(tablename, id):
     table = table_dict.get(tablename)
+    if not table and tablename == 'beer_photos':
+        table = BeerPhotos
     if table:
         obj = get_object(table, id=id)
         if not obj:
             raise InvalidResource
         args = collect_args()
-        update_object(obj, **args)
+
+        if tablename == 'beer_photos' and args.get('photo'):
+            beer_photo = query_wrapper(table, id=id)[0]
+            remove_filesystem_photo(beer_photo)
+
+            photo_blob = args.get('photo')
+            update_object(beer_photo, **create_beer_photo(data=photo_blob.stream.read(), photo_name=photo_blob.filename))
+        else:
+            update_object(obj, **args)
         session.commit()
         return success('Successfully updated item in "{}"'.format(tablename), id=obj.id)
 
@@ -228,6 +238,8 @@ def update_item(tablename, id):
 @login_required
 def delete_item(tablename, id):
     table = table_dict.get(tablename)
+    if tablename == 'beer_photos':
+        table = BeerPhotos
     if table:
         obj = get_object(table, id=id)
         if not obj:
