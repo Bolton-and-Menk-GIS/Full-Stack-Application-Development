@@ -247,11 +247,12 @@ That is all that we need to do for the `LoginPage.vue` file.  Save the Changes.
 
 ### create a login button in the navbar
 
-Now that we have created the `LoginPage` component, we can add it to a Bootstrap-Vue [`modal`](https://bootstrap-vue.js.org/docs/components/modal).  Open the `AppNavBar.vue` file and import the `LoginPage` component and `EventBus`:
+Now that we have created the `LoginPage` component, we can add it to a Bootstrap-Vue [`modal`](https://bootstrap-vue.js.org/docs/components/modal).  Open the `AppNavBar.vue` file and import the `LoginPage` component, `EventBus`, and `api` modules:
 
 ```js
 import { EventBus } from '../modules/EventBus';
 import LoginPage from './Home/LoginPage';
+import api from '../modules/api';
 ```
 
 now register the component by adding a `components` property:
@@ -358,7 +359,7 @@ methods: {
 },
 ```
 
-Save the changes. The above methods are pretty self explanatory, but the important thing is that this will be emitting events for when the user logs in and logs out.  The one that isn't so obvious is the `dismisLogin` method.  This will be called when the user hits the `Sign Up` link, which will then dismiss the login modal and use the router to navigate to the sign up page (which we will create in the next step).  Before moving on to the sign up page, test to make sure the login modal displays when you click on the login button on the upper right of screen:
+Save the changes. The above methods are pretty self explanatory, but the important thing is that this will be emitting events for when the user logs in and logs out.  The one that isn't so obvious is the `dismissLogin` method.  This will be called when the user hits the `Sign Up` link, which will then dismiss the login modal and use the router to navigate to the sign up page (which we will create in the next step).  Before moving on to the sign up page, test to make sure the login modal displays when you click on the login button on the upper right of screen:
 
 ![login button](images/sec_06/login_button.PNG)
 

@@ -754,6 +754,439 @@
 			]
 		},
 		{
+			"name": "edits",
+			"description": "tests for editing in brewery_api",
+			"item": [
+				{
+					"name": "create brewery",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "66fd369f-21d8-4737-957c-a0b24fb2059a",
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable('new_brewery_id', jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Test Brewery",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "comments",
+									"value": "this is a test edit",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "y",
+									"value": "46.7867",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "x",
+									"value": "-92.1005",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/breweries/create",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"breweries",
+								"create"
+							]
+						},
+						"description": "creates a new brewery.  Add the following test:\n\nvar jsonData = JSON.parse(responseBody);\npostman.setEnvironmentVariable('new_brewery_id', jsonData.id);"
+					},
+					"response": []
+				},
+				{
+					"name": "add beer to brewery",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "47095f03-4cac-421a-b5a9-62f4511259ec",
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable('new_beer_id', jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Pacific Phantom",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "this is a test beer",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "brewery_id",
+									"value": "{{new_brewery_id}}",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/beers/create",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"beers",
+								"create"
+							]
+						},
+						"description": "creates a new beer for brewery.  Add the following test:\n\nvar jsonData = JSON.parse(responseBody);\npostman.setEnvironmentVariable('new_beer_id', jsonData.id);"
+					},
+					"response": []
+				},
+				{
+					"name": "check brewery updates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries/{{new_brewery_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries",
+								"{{new_brewery_id}}"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "update brewery",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "city",
+									"value": "Duluth",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "comments",
+									"value": "I have overriden the comment",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/breweries/{{new_brewery_id}}/update",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"breweries",
+								"{{new_brewery_id}}",
+								"update"
+							]
+						},
+						"description": "tests a brewery update"
+					},
+					"response": []
+				},
+				{
+					"name": "fetch beers for new brewery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/breweries/{{new_brewery_id}}/beers",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"breweries",
+								"{{new_brewery_id}}",
+								"beers"
+							]
+						},
+						"description": "checks for beers for our new brewery"
+					},
+					"response": []
+				},
+				{
+					"name": "add beer photo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c4ada451-7305-4151-aa92-72da40715f57",
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable('new_beer_photo_id', jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "photo_name",
+									"value": "pacific_phantom.png",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"description": "",
+									"type": "file",
+									"src": "pacific_phantom.png"
+								},
+								{
+									"key": "beer_id",
+									"value": "{{new_beer_id}}",
+									"description": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/beer_photos/create",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"beer_photos",
+								"create"
+							]
+						},
+						"description": "creates a new beer for brewery.  Add the following test:\n\nvar jsonData = JSON.parse(responseBody);\npostman.setEnvironmentVariable('new_beer_photo_id', jsonData.id);"
+					},
+					"response": []
+				},
+				{
+					"name": "new beer photo infos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beers/{{new_beer_id}}/photos",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beers",
+								"{{new_beer_id}}",
+								"photos"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "new beer photo download",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/photos/{{new_beer_photo_id}}/download",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"photos",
+								"{{new_beer_photo_id}}",
+								"download"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "delete new brewery",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/breweries/{{new_brewery_id}}/delete",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"breweries",
+								"{{new_brewery_id}}",
+								"delete"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "check beers after deleting brewery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beers/{{new_beer_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beers",
+								"{{new_beer_id}}"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "delete new beer",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{auth}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/data/beers/{{new_beer_id}}/delete",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"data",
+								"beers",
+								"{{new_beer_id}}",
+								"delete"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "check photo infos after deleting new beer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{host}}:{{port}}/beer/photos/{{new_beer_photo_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"beer",
+								"photos",
+								"{{new_beer_photo_id}}"
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "endpoints",
 			"request": {
 				"method": "GET",

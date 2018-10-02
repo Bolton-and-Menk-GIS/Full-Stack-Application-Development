@@ -205,6 +205,8 @@ Save the changes to the `utils.py` file.  Next, add an endpoint in the `brewery_
 @brewery_api.route('/data/<tablename>/export', methods=['POST'])
 @login_required
 def export_table_data(tablename):
+    if tablename == 'beer_photos':
+        return dynamic_error(message='data export is not available for beer photos')
     table = table_dict.get(tablename)
     print(tablename, table)
     if table:
@@ -241,7 +243,8 @@ table_dict = {
     'breweries': Brewery,
     'beers': Beer,
     'styles': Style,
-    'categories': Category
+    'categories': Category,
+    'beer_photos': BeerPhotos
 }
 ```
 
