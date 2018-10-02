@@ -22,7 +22,8 @@ table_dict = {
     'breweries': Brewery,
     'beers': Beer,
     'styles': Style,
-    'categories': Category
+    'categories': Category,
+    'beer_photos': BeerPhotos
 }
 
 # API METHODS BELOW
@@ -125,6 +126,8 @@ def download_beer_photo(id):
 @brewery_api.route('/data/<tablename>/export', methods=['POST'])
 @login_required
 def export_table_data(tablename):
+    if tablename == 'beer_photos':
+        return dynamic_error(message='data export is not available for beer photos')
     table = table_dict.get(tablename)
     print(tablename, table)
     if table:
