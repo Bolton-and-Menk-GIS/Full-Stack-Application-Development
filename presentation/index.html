@@ -31,35 +31,25 @@
           <ul>
             <li>Front End</li>
             <ul>
-              <li>Application Code itself (html, CSS, JavaScript)</li>
-              <li>very important to have good UI/UX</li>
+              <li class="fragment">Application Code itself (html, CSS, JavaScript)</li>
+              <li class="fragment">very important to have good UI/UX</li>
             </ul>
-            <li>Back End or Server Side (Java, .NET, Ruby, Python, Node, etc)</li>
+            <li class="fragment">Back End or Server Side (Java, .NET, Ruby, Python, Node, etc)</li>
             <ul>
-              <li>perform server side tasks, connect to databases, etc</li>
-              <li>backend processes are exposed as web services</li>
+              <li class="fragment">perform server side tasks, connect to databases, etc</li>
+              <li class="fragment">backend processes are exposed as web services</li>
             </ul>
-            <li>Full Stack?</li>
+            <li class="fragment">Full Stack?</li>
             <ul>
-              <li>Front End + Back End</li>
-              <li>many applications have a backend component</li>
+              <li class="fragment">Front End + Back End</li>
+              <li class="fragment">many applications have a backend component</li>
             </ul>
           </ul>
         </section>
 
         <section id="backend">
-          <section>
-            <h3>Why Create Web Services?</h3>
-              <ul>
-                <li class='fragment'>An application often needs data which is usually stored in a database on a server</li>
-                <li class='fragment'>A web service provides a communication layer with a database/data store to retrieve data to be used in the application</li>
-                <li class='fragment'>A web service also provides methods to access data that can be formatted into specific data structures and run processes on the server to return processed data the client won't need to process</li>
-              </ul>
-          </section>
 
-      <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::: -->
-      <!-- ::::::::::::: || FRAMEWORKS STACK || CM ::::::::::::::: --> 
-      <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
         <section data-transition="convex" data-background-transition="zoom" style='margin-top:-50px'>
           <h3>Creating Custom Web Services</h3>
           <ul class='fragment'>
@@ -70,9 +60,9 @@
           </ul>
           <ul class='fragment'>
             <li>Why Python?</li>
-            <ul class='fragment'>
-              <li>We already have a huge library of custom Python modules</li>
-              <li>Tons of Third Party modules available</li>
+            <ul>
+              <li class='fragment'>We already have a huge library of custom Python modules</li>
+              <li class='fragment'>Tons of Third Party modules available</li>
             </ul>
           </ul>
         </section>
@@ -82,7 +72,7 @@
           <ul>
             <li class='fragment'>Django, Flask, Bottle, Twisted, Cherry Py, Tornado, etc</li>
             <ul>
-              <li  class='fragment' type='circle'>Django and Flask seem to be the most widely used</li>
+              <li class='fragment' type='circle'>Django and Flask seem to be the most widely used</li>
             </ul>
             <li class='fragment'>"The Navy uses Django, Pirates use Flask..."</li>
           </ul>
@@ -108,7 +98,7 @@
                 <li class='fragment'>Less Overhead than Django</li>
                 <li class='fragment'>Simple setup, can be up and running in 2 minutes</li>
               </ul>
-              <li class='fragment'>Has many extensions, such as Flask-SqlAlchemy to support database Object Relational Mapping (ORM)</li>
+              <li class='fragment'>Has many extensions</li>
             </ul>
             <li class='fragment'>Can also be used to create entire web applications (front and back end) completely written in Python via <a href="http://jinja.pocoo.org/docs/2.9/" target="_blank">Jinja2</a> templates.</li>
           </ul>
@@ -130,27 +120,137 @@
           </code></pre>
         </section>
 
-        <section class="present" style='margin-top: -15px'>
-          <h4>Validating against Active Directory</h4>
-          <pre ><code class="hljs python" data-trim>
-              class SecurityHandler(object):
-                  _ldap_base = 'LDAP://ldap_server.your-domain.com'  # very important, your ldap server
-                  _default_group = None
+        <section class="present" id="flask-extensions">
+          <h4>Flask Extensions and Libraries</h4>
+          <ul>
+            <li class='fragment'><a href="http://flask-sqlalchemy.pocoo.org/2.3/" target="_blank">Flask-SqlAlchemy</a> to support database Object Relational Mapping (ORM)</li>
+            <li class='fragment'><a href="https://flask-login.readthedocs.io/en/latest/" target="_blank">Flask Login</a> provides user session management</li>
+            <li class='fragment'><a href="http://docs.celeryproject.org/en/latest/" target="_blank">Celery</a> for processing background jobs</li>
+            <li class='fragment'><a href="https://flask-limiter.readthedocs.io/en/stable/" target="_blank">Flask Limiter</a> can set limits to traffic on endpoints</li>
+          </ul>
+        </section>
 
-                  def validate_AD(self, usr, pw='xxx', group=_default_group):
-                      usr = usr.split('\\')[-1]
-                      dn = 'your-domain\\{}'.format(usr.split('\\')[-1])  #username with domain validation
+        <section class="present" style='margin-top: -15px' id="login">
+          <h4>Validating against Active Directory</h4>
+          <pre><code class="hljs python" data-trim style="font-size: 0.95rem;">
+              from flask import Flask, jsonify
+              from utils import collect_args, success
+              from flask_login import LoginManager, login_user, login_required
+              from .exceptions import *
+              import ldap
+              from datetime import datetime, timedelta
+
+              # some fake class that represents a database of users
+              # who have logged in
+              userStore = UserStore()
+
+              app = Flask(__name__)
+
+
+              # register flask-login manager
+              login_manager = LoginManager()
+              login_manager.init_app(app)
+              login_manager.unauthorized_handler(unauthorized_callback)
+
+              # set secret key and cookie name for flask-login
+              app.config['SECRET_KEY'] = 'beer-app'
+              app.config['REMEMBER_COOKIE_NAME'] = 'beer_app_token'
+
+
+              # callback to reload the user object for flask-login
+              @login_manager.user_loader
+              def load_user(userid):
+                  return userStore.get_user(id=userid)
+
+              # this would look for a token
+              @login_manager.request_loader
+              def load_user_from_request(request):
+                  """ allow users to be loaded via request params or authorization header """
+                  # check for token in request params or in Authorization header
+                  args = collect_args()
+                  token = args.get('token') or request.headers.get('Authorization')
+                  if token:
                       try:
-                          conn = ldap.initialize(self._ldap_base)
+                          user = userStore.get_user(token=token)
+
+                          # check if token is expired (from database userStore)
+                          if datetime.datetime.utcnow() > user.expires:
+                              # return None
+                              raise SessionExpired
+                          return user
+                      except UserNotFound:
+                          # return None
+                          raise UserNotFound
+
+                  # return None
+                  raise TokenRequired
+
+
+              class SecurityHandler(object):
+                  def __init__(self, domain_name):
+                      self.domain_name = domain_name
+
+                  def validate_AD(self, usr, pw='xxx'):
+                      usr = usr.split('\\')[-1]
+                      dn = '{}\\{}'.format(self.domain_name, usr.split('\\')[-1])  #username with domain validation
+                      print 'pw is: ', pw
+                      try:
+                          conn = ldap.initialize(self._domain_name)
                           conn.protocol_version = 3
                           conn.set_option(ldap.OPT_REFERRALS, 0)
                           conn.simple_bind_s(dn, pw or 'xxx')  # need to be able to throw an error off an invalid pw
-                          if group and not self.userInGroup(usr, group):  # custom method to check if user is in group
-                              return GROUP_ACCESS_DENIED
-                          return VALID_CREDENTIALS
+                          return userStore.get_user(username=usr)
                       except ldap.INVALID_CREDENTIALS:
-                          return INVALID_CREDENTIALS
+                          return None
+
+              sh = SecurityHandler(domain_name='ldap.forumsys.com')
+
+
+              @app.route('/login', methods=['POST'])
+              def login():
+                  args = collect_args()
+                  username = args.get('username')
+                  password = base64.b64decode(args.get('password', ''))
+                  remember_me = args.get('remember', False) in ('true', True)
+                  validatedUser = sh.validate_AD(username, password)
+                  if validatedUser:
+
+                      # flask_login.login_user
+                      login_user(validatedUser, remember=remember_me)
+
+                      # fake method that would fetch a token for the user
+                      token = validatedUser.fetchToken()
+
+                      return success('user logged in', token=token)
+                  raise InvalidCredentials
+
+
+              # API METHODS BELOW
+
+              # unsecured rest endpoint
+              @app.route('/')
+              def hello():
+                  return jsonify({'message': 'welcome to the brewery api!'})
+
+
+              # secured, a token would need to be passed in!
+              @app.route('/authtest', methods=['GET', 'POST'])
+              @login_required
+              def test():
+                  return jsonify(collect_args())
           </code></pre>
+        </section>
+
+        <section class="present">
+          <h4>Testing Your API's</h4>
+          <ul>
+            <li class="fragment">testing should always be done!</li>
+            <li class="fragment"><a href="https://www.getpostman.com/" target="_blank">Postman</a> - used to test the actual HTTP requests</li>
+            <ul>
+              <li class="fragment">can save tests as a collection to share with others</li>
+            </ul>
+            <li class="fragment"><a href="https://www.telerik.com/fiddler" target="_blank">Fiddler</a> - proxy to monitor traffic</li>
+          </ul>
         </section>
       </section>
 
@@ -159,13 +259,241 @@
       <!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
 
         <section>
-          
+          <section class="presentation" id="front-end">
+            <h2>the Front End</h2>
+            <ul>
+              <li class="fragment">Again: UI/UX is important!</li>
+              <ul>
+                <li class="fragment">if the app is not user friendly, people won't want to use it</li>
+                <li class="fragment">should be device responsive</li>
+              </ul>
+              <li class="fragment">frameworks make building web apps easier</li>
+            </ul>
+          </section>
+
+          <section id='whatisit' data-transition="concave" data-background-transition="zoom" style='margin-top: 50px'>
+            <h3>What is a framework?</h3>
+            <ul>
+              <ul>
+                <li class='fragment' type='disc' style='margin-bottom: 5px;'>Provides a standard way to build and deploy web applications</li>
+              </ul>
+              <ul class='fragment'>
+                <li type='disc' style='margin-bottom: 5px;'>Framework Features</li>
+                <ul style='font-size: 90%;'>
+                  <li type='circle'>Templating</li>
+                  <li type='circle'>Routing</li>
+                  <li type='circle'>State Management</li>
+                  <li type='circle'>Data Fetching</li>
+                  <li type='circle'>Scaffolding</li>
+                </ul>
+              </ul>
+            </ul>
+          </section>
+          <!-- ::::::::::::::: WEB FRAMEWORK INTRO ::::::::::::::::: -->
+
+          <!-- ::::::::::::::: TELEMESS ::::::::::::::::: -->
+          <section id='tele-mess' data-transition="convex" data-background-transition="zoom" style='margin-top: 50px'>
+            <div class='top' style='display: flex;'>
+              <img style="margin-right: auto; margin-left: auto; height: 545px;" src='/images/Telemess.jpg'/>
+            </div>
+          </section>
+          <!-- ::::::::::::::: TELEMESS ::::::::::::::::: -->
+
+          <!-- ::::::::::::::: FRAMEWORK BENEFITS ::::::::::::::::: -->
+          <section id='Benefits' data-transition="convex" data-background-transition="zoom" style='margin-top: 50px'>
+            <h2>Framework Benefits</h2>
+            <ul>
+              <ul>
+                <li class='fragment' type='disc'>Modern frameworks utilize a virtual DOM</li>
+                <li class='fragment' type='disc'>DOM Interaction - A neccessary evil</li>
+                <li class='fragment' type='disc'>Data-driven vs DOM-driven UI Model</li>
+              </ul>
+              <ul class='fragment'>
+                <li type='disc'>Other benefits</li>
+                <ul style='font-size: 80%;'>
+                  <li type='circle'>Structure</li>
+                  <li type='circle'>Rule Enforcement</li>
+                  <li type='circle'>Maintainability/Scalability</li>
+                  <li type='circle'>Reusability</li>
+                  <li type='circle'>Efficiency</li>
+                  <li type='circle'>Faster Setup</li>
+                </ul>
+              </ul>
+            </ul>
+          </section>
+          <!-- ::::::::::::::: FRAMEWORK BENEFITS ::::::::::::::::: -->
+
+          <!-- ::::::::::::::: FRAMEWORK TYPES ::::::::::::::::: -->
+          <section id='framework-types' data-transition="convex" data-background-transition="zoom" style='padding-top: 0; margin-top: 20px; padding-bottom: 10px;'>
+            <h3 style='margin-bottom: 55px;'>Types of Frameworks</h3>
+            <ul style='margin-bottom: 20px; margin-top: 20px; width: 100%;'/>
+            <div class='top' style='display: flex; margin-bottom: 30px; margin-left: 60px; margin-right: 80px;'>
+              <img class='fragment' style='height: 115px; margin-left: -150px; background: none; border: none; box-shadow: none;' src='images/Ember.png'/>
+              <div style='margin-left: 50px;' class='fragment' style="font-size: 50%;">
+                <li style='font-size: 50%; width: 100%; padding-top: 20px; padding-right: 145px;'>Full Featured</li>
+                <li style='font-size: 50%; width: 100%;'>Most Structured</li>
+                <li style='font-size: 50%; width: 100%;'>Highly Opinionated</li>
+                <li style='font-size: 50%; width: 100%;'>Steep Learning Curve</li>
+              </div>
+              <img class='fragment' style='height: 165px; margin-left: 50px; background: none; border: none; box-shadow: none;' src='images/Angular.png'/>
+              <div style='margin-left: 65px;' class='fragment'>
+                <li style='font-size: 50%; padding-top: 20px;'>Full Featured</li>
+                <li style='font-size: 50%;'>Highly Structured</li>
+                <li style='font-size: 50%;'>TypeScript provides good best practices</li>
+                <li style='font-size: 50%; width: 120%;'>Steep Learning Curve</li>
+              </div>
+            </div>
+            <div class='top' style='display: flex; margin-left: 75px; margin-right: 90px;'>
+              <img class='fragment' style='height: 165px; margin-right: 65px; margin-left: -80px; background: none; border: none; box-shadow: none;' src='images/React.png'/>
+              <div style='margin-left: 15px;' class='fragment'>
+                <li style='font-size: 50%; padding-top: 20px;'>Most Popular</li>
+                <li style='font-size: 50%;'>Less Structured</li>
+                <li style='font-size: 50%; width: 105%;'>View Layer Focused</li>
+                <li style='font-size: 50%;'>Versatile</li>
+              </div>
+              <img class='fragment' style='height: 165px; margin-right: 45px; margin-left: 50px; background: none; border: none; box-shadow: none;' src='images/Vue.png'/>
+              <div style='margin-left: 15px;' class='fragment'>
+                <li style='font-size: 50%; padding-top: 20px;'>Approachable </li>
+                <li style='font-size: 50%; width: 105%;'>Lightweight & Performant</li>
+                <li style='font-size: 50%;'>View Layer Focused</li>
+                <li style='font-size: 50%;'>Versatile</li>
+              </div>
+            </div>
+            </ul>
+          </section>
+        </section>
+
+        <section id="vuejs-stack">
+          <!-- ::::::::::::::: VUE TITLE ::::::::::::::: -->
+          <section id='vue-title' data-transition="convex" data-background-transition="zoom" style='margin-top: 50px'>
+            <div>
+              <img style="margin-right: auto; margin-left: auto; background: none; border: none; box-shadow: none;" src='images/Vue.png'/>
+              <div>
+                Vue.js
+              </div>
+            </div>
+          </section>
+          <!-- ::::::::::::::: VUE TITLE ::::::::::::::: -->
+
+          <!-- ::::::::::::::: VUE INSTANCE ::::::::::::::::: -->
+          <section id='vue-instance' data-transition="convex" data-background-transition="zoom" style='padding-top: 0; padding-bottom: 10px; margin-top: 20px'>
+            <h2 style='margin-bottom: 35px;'>Vue Instance</h2>
+
+            <div class='fragment'>
+              <pre><code class="hljs html" data-trim>
+              <!-- HTML -->
+              <div id="app">
+                <p>{{ text }}</p>
+              </div>
+              </code></pre>
+
+
+              <pre><code class="hljs javascript" data-trim>
+            // JavaScript
+            new Vue({
+              el: '#app',
+              data: {
+                text: 'Welcome to GIS LIS!'
+              }
+            });
+          </code></pre>
+            </div>
+
+          </section>
+
+          <section class="presentation">
+            <h4><a href="https://www.youtube.com/watch?v=p1iLqZnZPdo" target="_blank">Vue.js Intro Video</a></h4>
+          </section>
+
+          <section id='component' data-transition="convex" data-background-transition="zoom" style='padding-top: 0; padding-bottom: 10px; margin-top: -20px'>
+            <h3 style='margin-bottom: 35px;'>Vue Component</h3>
+            <h5><a href="https://vuejs.org/v2/guide/components.html" target="_blank">demo link</a></h5>
+            <div class='fragment'>
+              <pre><code class="hljs html" data-trim>
+                <!-- HTML -->
+                <div id="sample-component">
+                  <button-counter></button-counter>
+                </div>
+              </code></pre>
+
+
+              <pre><code class="hljs javascript" data-trim>
+            // JavaScript
+            // COMPONENT DEFINITION - called button-counter
+            Vue.component('button-counter', {
+              template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>',
+              data: function () {
+                return {
+                  count: 0
+                }
+              }
+            });
+
+            // VUE INSTANCE
+            new Vue({ el: '#sample-component' })
+          </code></pre>
+            </div>
+          </section>
+          <!-- ::::::::::::::::: COMPONENT :::::::::::::::::: -->
+
+
+          <!-- ::::::::::::::: VUE FILE :::::::::::::::::::::::: -->
+          <section id='vue-file' data-transition="convex" data-background-transition="zoom" style='padding-top: 0; padding-bottom: 10px; margin-top: 30px'>
+            <h2 style='margin-bottom: 35px; margin-top: -10%;'>.vue File</h2>
+            <div class='fragment'>
+              <pre><code class="hljs javascript" data-trim style="max-height: 600px;">
+                <!-- template -->
+                <template>
+                  <!-- injected into parent component -->
+                  <div>
+                    <p>HTML Structure</p>
+                    <div class="someClass">{{ text }}</div>
+                  </div>
+                  <!-- injected into parent component -->
+                </template>
+
+                <script>
+                  // component definition
+                  export default{
+                    data(){
+                      return {
+                        text: 'Welcome to GIS LIS!'
+                      }
+                    }
+                  }
+                </script>
+
+                <style>
+                /* nested component style definition */
+                .someClass{
+                  color: red;
+                  background-color: black;
+                  height: 500px;
+                  width: 500px;
+                }
+                </style>
+          </code></pre>
+            </div>
+          </section>
+
+          <section class="presentation" id="router">
+            <h2>Vue Router</h2>
+            <ul>
+              <li class="fragment">Used to create modern Single Page Apps (SPAs)</li>
+              <li class="fragment">Routes are registered with the router and can be navigated via changing the url or programmatically</li>
+              <li class="fragment">Also supports <a href="https://router.vuejs.org/guide/advanced/navigation-guards.html" target="_blank">Router Navigation Guards</a> to before entering/leaving routes</li>
+              <li class="fragment">supports history or hash mode</li>
+            </ul>
+          </section>
+
         </section>
 
         <section id="references">
           <h3>References</h3>
           <ul>
             <li><a href="https://skillcrush.com/2017/02/27/front-end-back-end-full-stack/" target="_blank">what is full stack development?</a></li>
+            <li><a href="https://router.vuejs.org/guide/" target="_blank">Vue Router</a></li>
+            <li><a href="https://router.vuejs.org/guide/advanced/navigation-guards.html" target="_blank">Router Navigation Guards</a></li>
           </ul>
         </section>
       </div>
