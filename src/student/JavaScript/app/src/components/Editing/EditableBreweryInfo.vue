@@ -120,6 +120,20 @@
       </b-row>
 
       <!--  BEER ROWS -->
+      <b-row class="mt-4">
+        <accordion :header="'Featured Beers'" @action-btn-clicked="addBeer">
+          <template slot="action_btn">
+            <i class="fas fa-plus-circle" title="add new beer"></i>
+          </template>
+
+          <b-list-group v-for="beer in beers" v-show="beers.length" :key="beer.id">
+            <beer-preview :beer="beer" @delete-beer="deleteBeer"/>
+          </b-list-group>
+
+          <h5 v-show="!beers.length" style="color: gray;" class="mt-2">No beers found, use plus button to add new beers</h5>
+
+        </accordion>
+      </b-row>
 
     </b-container>
 
@@ -132,11 +146,13 @@
   import Accordion from '../UI/Accordion';
   import { EventBus } from "../../modules/EventBus";
   import swal from 'sweetalert2';
+  import BeerPreview from './BeerPreview';
 
   export default {
     name: "brewery-info",
     components: {
-      Accordion
+      Accordion,
+      BeerPreview
     },
     data(){
       return {
@@ -221,120 +237,119 @@
 
       deleteBrewery(){
         console.log('clicked delete brewery!')
-    //     //const component = this
-    //     swal({
-    //       title: 'Are you sure?',
-    //       text: 'Once deleted, this operation cannot be undone',
-    //       type: 'warning',
-    //       showCancelButton: true,
-    //       confirmButtonText: 'Yes, Delete',
-    //       confirmButtonColor: 'forestgreen',
-    //       showLoaderOnConfirm: true,
-    //       allowOutsideClick: ()=> !swal.isLoading(),
-    //       preConfirm: async ()=> {
-    //         return await api.deleteItem('breweries', this.brewery.id);
-    //       }
-    //     }).then((res)=> {
-    //       console.log('RES: ', res.value);
-    //       this.state = 'deleted';
-    //       EventBus.$emit('brewery-changed', {
-    //         id: this.brewery.id,
-    //         type: 'delete'
-    //       });
-    //       swal({
-    //         type: 'success',
-    //         title: 'Success!',
-    //         text: 'successfully deleted brewery'
-    //       }).then(()=>{
-    //         this.$router.push({name: 'home'});
-    //       });
-    //     }).catch((err)=> {
-    //       swal({
-    //         type: 'error',
-    //         title: 'Unable to Delete Brewery',
-    //         text: "please make sure you're logged in to make this change"
-    //       })
-    //     })
+        swal({
+          title: 'Are you sure?',
+          text: 'Once deleted, this operation cannot be undone',
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Delete',
+          confirmButtonColor: 'forestgreen',
+          showLoaderOnConfirm: true,
+          allowOutsideClick: ()=> !swal.isLoading(),
+          preConfirm: async ()=> {
+            return await api.deleteItem('breweries', this.brewery.id);
+          }
+        }).then((res)=> {
+          console.log('RES: ', res.value);
+          this.state = 'deleted';
+          EventBus.$emit('brewery-changed', {
+            id: this.brewery.id,
+            type: 'delete'
+          });
+          swal({
+            type: 'success',
+            title: 'Success!',
+            text: 'successfully deleted brewery'
+          }).then(()=>{
+            this.$router.push({name: 'home'});
+          });
+        }).catch((err)=> {
+          swal({
+            type: 'error',
+            title: 'Unable to Delete Brewery',
+            text: "please make sure you're logged in to make this change"
+          })
+        })
       },
 
-    //   async addBeer(){
-    //     console.log('clicked add beer');
-    //     swal({
-    //       title: 'Create New Beer',
-    //       input: 'text',
-    //       showCancelButton: true,
-    //       confirmButtonText: 'Create',
-    //       confirmButtonColor: 'forestgreen',
-    //       showLoaderOnConfirm: true,
-    //       allowOutsideClick: ()=> !swal.isLoading(),
-    //       preConfirm: async (name)=> {
-    //         return await api.createItem('beers', {
-    //           brewery_id: this.brewery.id,
-    //           name: name
-    //         });
-    //       }
-    //     }).then((res)=> {
-    //       const newBeerId = res.value.id;
-    //       console.log('CREATE BEER RESPONSE: ', res, newBeerId);
-    //       swal({
-    //         title: 'Success',
-    //         text: 'successfully created new beer',
-    //         confirmButtonText: 'Go To New Beer',
-    //         cancelButtonText: 'Stay Here',
-    //         showCancelButton: true
-    //       }).then((res)=>{
-    //         res.value ? this.goToEditBeer(newBeerId): this.emitBeerChange(newBeerId, 'create');
-    //       });
+      async addBeer(){
+        console.log('clicked add beer');
+        swal({
+          title: 'Create New Beer',
+          input: 'text',
+          showCancelButton: true,
+          confirmButtonText: 'Create',
+          confirmButtonColor: 'forestgreen',
+          showLoaderOnConfirm: true,
+          allowOutsideClick: ()=> !swal.isLoading(),
+          preConfirm: async (name)=> {
+            return await api.createItem('beers', {
+              brewery_id: this.brewery.id,
+              name: name
+            });
+          }
+        }).then((res)=> {
+          const newBeerId = res.value.id;
+          console.log('CREATE BEER RESPONSE: ', res, newBeerId);
+          swal({
+            title: 'Success',
+            text: 'successfully created new beer',
+            confirmButtonText: 'Go To New Beer',
+            cancelButtonText: 'Stay Here',
+            showCancelButton: true
+          }).then((res)=>{
+            res.value ? this.goToEditBeer(newBeerId): this.emitBeerChange(newBeerId, 'create');
+          });
 
-    //     }).catch(err =>{
-    //       console.log('error creating beer: ', err);
-    //       swal({
-    //         type: 'error',
-    //         title: 'Unable to Create Beer',
-    //         text: "please make sure you're logged in to make this change"
-    //       })
-    //     });
-    //   },
+        }).catch(err =>{
+          console.log('error creating beer: ', err);
+          swal({
+            type: 'error',
+            title: 'Unable to Create Beer',
+            text: "please make sure you're logged in to make this change"
+          })
+        });
+      },
 
-    //   deleteBeer(id){
-    //     //const component = this
-    //     swal({
-    //       title: 'Are you sure?',
-    //       text: 'Once deleted, this operation cannot be undone',
-    //       type: 'warning',
-    //       showCancelButton: true,
-    //       confirmButtonText: 'Yes, Delete',
-    //       confirmButtonColor: 'forestgreen',
-    //       showLoaderOnConfirm: true,
-    //       allowOutsideClick: ()=> !swal.isLoading(),
-    //       preConfirm: async ()=> {
-    //         return await api.deleteItem('beers', id);
-    //       }
-    //     }).then((res)=> {
-    //       console.log('RES: ', res.value);
-    //       this.emitBeerChange(id, 'delete');
+      deleteBeer(id){
+        //const component = this
+        swal({
+          title: 'Are you sure?',
+          text: 'Once deleted, this operation cannot be undone',
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Delete',
+          confirmButtonColor: 'forestgreen',
+          showLoaderOnConfirm: true,
+          allowOutsideClick: ()=> !swal.isLoading(),
+          preConfirm: async ()=> {
+            return await api.deleteItem('beers', id);
+          }
+        }).then((res)=> {
+          console.log('RES: ', res.value);
+          this.emitBeerChange(id, 'delete');
 
-    //       swal({
-    //         type: 'success',
-    //         title: 'Success!',
-    //         text: 'successfully deleted beer'
-    //       });
-    //     }).catch((err)=> {
-    //       swal({
-    //         type: 'error',
-    //         title: 'Unable to Delete Beer',
-    //         text: "please make sure you're logged in to make this change"
-    //       })
-    //     })
-    //   },
+          swal({
+            type: 'success',
+            title: 'Success!',
+            text: 'successfully deleted beer'
+          });
+        }).catch((err)=> {
+          swal({
+            type: 'error',
+            title: 'Unable to Delete Beer',
+            text: "please make sure you're logged in to make this change"
+          })
+        })
+      },
 
-    //   goToEditBeer(id){
-    //     console.log('navigating to new beer: ', id);
-    //     this.emitBeerChange(id, 'create');
-    //     setTimeout(()=>{
-    //       this.$router.push({ name: 'editableBeerInfo', params: { beer_id: id } });
-    //     }, 250);
-    //   },
+      goToEditBeer(id){
+        console.log('navigating to new beer: ', id);
+        this.emitBeerChange(id, 'create');
+        setTimeout(()=>{
+          this.$router.push({ name: 'editableBeerInfo', params: { beer_id: id } });
+        }, 250);
+      },
 
       async saveChanges(){
         console.log('submitting edits: ', this.brewery);
@@ -362,14 +377,14 @@
         });
       },
 
-    //   emitBeerChange(id, type){
-    //     EventBus.$emit('beers-changed', {
-    //       brewery_id: this.brewery_id,
-    //       beer_id: id,
-    //       type: type
-    //     });
-    //     this.updateBeers();
-    //   },
+      emitBeerChange(id, type){
+        EventBus.$emit('beers-changed', {
+          brewery_id: this.brewery_id,
+          beer_id: id,
+          type: type
+        });
+        this.updateBeers();
+      },
     }
   }
 </script>

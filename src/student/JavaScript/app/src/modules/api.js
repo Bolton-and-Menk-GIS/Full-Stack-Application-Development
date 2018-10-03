@@ -15,6 +15,18 @@ const api = {
     return request(`/breweries/${breweryId}/beers`, options);
   },
 
+  getBeer(id, options={}){
+    return request(`/beers/${id}`, options);
+  },
+
+  async getStyles(options, asOptions=true){
+    const resp = await request('/beer/styles', options);
+    if (asOptions){
+      return resp.map(s => s.style_name).sort().map(s => { return { text: s, value: s } });
+    }
+    return resp;
+  },
+
   getBeerPhotos(beerId, options={}){
     return request(`/beers/${beerId}/photos`, options);
   },
@@ -113,7 +125,9 @@ const api = {
     formData.append('beer_id', beer_id);
 
     // return response
-    const resp =  axios.post(`/data/beer_photos/${parseInt(photoId) > 0 ? photoId + '/update': 'add'}`,
+    const url = `/data/beer_photos/${parseInt(photoId) > 0 ? photoId + '/update': 'create'}`;
+    console.log(url)
+    const resp =  axios.post(url,
       formData,
       {
         headers: {
