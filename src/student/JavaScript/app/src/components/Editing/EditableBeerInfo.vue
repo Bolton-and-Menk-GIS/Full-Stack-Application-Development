@@ -156,7 +156,7 @@
           if (choice.value) {
             // save here before proceeding
             console.log('SAVE BEER HERE!');
-            console.log(await this.saveChanges());
+            this.saveChanges();
           }
 
           // now proceed
