@@ -4,8 +4,12 @@
 
 The first thing we need to do to enable editing on the client side is add the appropriate API methods.  Open the `api.js` file inside the `modules` folder.  Add the following methods:
 
+import enums
 ```js
+import enums from './enums';
+```
 
+```js
 getBeer(id, options={}){
     return request(`/beers/${id}`, options);
   },
@@ -929,11 +933,291 @@ const routes = [
 ];
 ```
 
- 
+### navigation back button
+
+```html
+<span class="back mr-3" title="go back" @click="$router.back()" v-if="backEnabled">
+  <font-awesome-icon prefix="fas" icon="arrow-circle-left"/>
+</span>
+```
+
+```css
+.back {
+    font-size: 1.75rem;
+    color: white;
+    cursor: pointer;
+}
+```
 
 
+### add event listener in main.js
+```js
+// listen for user login/logout events
+EventBus.$on('user-logged-in', ()=>{
+  this.userIsAuthenticated = true;
+  // this.$refs.mapView.createAddBreweryButton();
+});
+
+EventBus.$on('user-logged-out', ()=>{
+ this.userIsAuthenticated = false;
+});
+```
+
+#### update data main.js
+
+```js
+// data must be a function that returns an object
+data(){
+  return {
+    config: config,
+    userIsAuthenticated: false
+  }
+}
+```
+
+### home.vue add watcher for user is authenticated
+
+```js
+'$root.userIsAuthenticated'(newVal){
+  this.userIsAuthenticated = newVal;
+}
+```
+
+### add brewery button map
+```js
+createAddBreweryButton(){
+        const addButton = createControlButton({
+          className: 'add-brewery',
+          iconClass: 'fas fa-plus',
+          onClick: this.addNewBrewery,
+          title: 'add new brewery'
+        });
+
+        this.map.addControl(addButton, 'top-left');
+        this.addBreweryButton = addButton;
+      },
+
+      deactivateAddBrewery(){
+        this.state = 'default';
+        this.canvas ? this.canvas.style.cursor = 'grab': null;
+      },
+
+      addNewBrewery(){
+        console.log('clicked add new brewery!');
+        if (this.state === 'adding'){
+          this.deactivateAddBrewery();
+          this.$emit('add-brewery-cancelled');
+          return;
+        }
+        this.$emit('clicked-add-brewery');
+        // set cursor to crosshair temporarily
+        this.canvas = document.querySelector('.mapboxgl-canvas-container');
+        this.canvas.style.cursor = 'crosshair';
+        this.state = 'adding';
+      },
+```
+ add watcher
+```js
+watch: {
+      '$root.userIsAuthenticated'(newVal){
+        if (newVal) {
+          if (!this.addBreweryButton){
+            this.createAddBreweryButton()
+          }
+        } else {
+          if (this.addBreweryButton){
+            this.map.removeControl(this.addBreweryButton);
+            this.addBreweryButton = null;
+          }
+        }
+      }
+    }
+```
+update map click handler
+
+update data
+```js
+return {
+    map: null,
+    selectionMarker: null,
+    state: 'default',
+    canvas: null,
+    addBreweryButton: null,
+ }
+```
+
+update mounted of map
+```js
+// update the brewery source when breweries have changed
+      EventBus.$on('brewery-changed', async (obj)=>{
+        console.log('brewery changed from map component: ', obj);
+        this.map.getSource('breweries').setData(await api.getBreweries());
+      });
+```
+
+```js
+mapClick(map, e){
+        console.log('map click: ', e);
+
+        // find features
+        if (this.state === 'default'){
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['breweries']
+          });
+
+          console.log('found features: ', features);
+          if (features.length){
+
+            // handle selection on map
+            const feature = features[0];
+            this.handleIdentify(feature);
+          } else if (this.selectionMarker){
+
+            // clear selection on map and close identify
+            this.selectionMarker.remove();
+            this.selectionMarker = null;
+            this.$emit('cleared-selection')
+          }
+        } else {
+          this.$emit('new-brewery-point', e.lngLat);
+        }
+      },
+```
 
 
+### add home.vue methods
+
+```js
+import swal from 'sweetalert2';
+import api from '../../modules/api';
+```
+
+```js
+handleAddBrewery(){
+        this.addBreweryActive = true;
+        this.activateButton('.add-brewery');
+      },
+
+      deactivateAddBrewery(){
+        const btn = document.querySelector('.add-brewery');
+        btn ? btn.classList.remove('control-btn-active'): null;
+        this.addBreweryActive = false;
+        this.$refs.mapView.deactivateAddBrewery();
+      },
 
 
+      async createNewBrewery(point){
+
+        swal({
+          title: 'Create New Brewery',
+          input: 'text',
+          showCancelButton: true,
+          confirmButtonText: 'Create',
+          confirmButtonColor: 'forestgreen',
+          showLoaderOnConfirm: true,
+          allowOutsideClick: ()=> !swal.isLoading(),
+          preConfirm: async (name)=> {
+            const lat = point.lat;
+            const lng = point.lng;
+
+            // fetch access token from root vue instance "config" prop
+            const accessToken = this.$root.config.map.accessToken;
+            const params = await api.maboxReverseGeocode(lat, lng, accessToken);
+
+            // add x,y coords
+            params.x = point.lng;
+            params.y = point.lat;
+
+            // add brewery name to params and create new brewery
+            params.name = name;
+            const resp = await api.createItem('breweries', params);
+
+            // notify new brewery has been created
+            EventBus.$emit('brewery-change', {
+              id: resp.id,
+              type: 'create'
+            });
+
+            this.deactivateAddBrewery();
+            return resp;
+          }
+        }).then((res)=> {
+          const newBreweryId = res.value.id;
+          this.emitBreweryChange(newBreweryId, 'create');
+          swal({
+            title: 'Success',
+            text: 'successfully created new brewery',
+            confirmButtonText: 'Go To New Brewery',
+            cancelButtonText: 'Stay Here',
+            showCancelButton: true
+          }).then((res)=>{
+            res.value ? this.goToEditBrewery(newBreweryId): null;
+          });
+
+        }).catch(err =>{
+          console.log('error creating brewery: ', err);
+          swal({
+            type: 'error',
+            title: 'Unable to Create Brewery',
+            text: "please make sure you're logged in to make this change"
+          })
+        });
+
+      },
+
+      goToEditBrewery(id){
+
+        // // small timeout to prevent race conditions
+        // setTimeout(()=>{
+          this.$router.push({ name: 'editableBreweryInfo', params: { brewery_id: id }})
+        // }, 250)
+      },
+
+      emitBreweryChange(id, type){
+        EventBus.$emit('brewery-changed', {
+          id: id,
+          type: type
+        })
+      },
+```
+
+update `mounted` of home
+
+```js
+// need to manually update this, because feature returned from map click is not
+      // the original object
+      EventBus.$on('brewery-changed', async (obj)=>{
+
+        if (this.selectedBrewery && obj.id === this.selectedBrewery.properties.id){
+          if (obj.type === 'delete'){
+            this.clearSelection();
+          } else {
+            const resp = await api.getBrewery(obj.id, { f: 'geojson' });
+            if (resp.features.length){
+              // update brewery
+              Object.assign(this.selectedBrewery, resp.features[0]);
+            }
+          }
+        }
+        if (obj.type === 'create'){
+          this.deactivateAddBrewery();
+        }
+      });
+```
+
+### update template home.vue
+```html
+<!-- MAP VIEW-->
+    <map-view
+            ref="mapView"
+            :userIsAuthenticated="userIsAuthenticated"
+            @clicked-add-brewery="handleAddBrewery"
+            @new-brewery-point="createNewBrewery"
+            @add-brewery-cancelled="deactivateAddBrewery"
+            @toggle-identify="identifyActivePanel"
+            @cleared-selection="clearSelection"
+            @brewery-identified="showBreweryInfo"
+            @toggle-menu="menuActivePanel">
+    </map-view>
+```
 
