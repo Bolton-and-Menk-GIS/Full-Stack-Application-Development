@@ -5,6 +5,7 @@
         <h4><strong>{{ properties.name }}</strong></h4>
         <span class="float-right edit-btn"
               title="edit brewery info"
+              @click="editBrewery"
               v-show="userIsAuthenticated" >
           <font-awesome-icon prefix="fas" icon="pen" />
         </span>
@@ -79,6 +80,16 @@
         // form query url for google directions, try address first if has address city st zip else use x,y
         const dest = addr_parts.every(f => !!f) ? addr_parts.join(' ').replace(/\s/g, '+'): `${feature.y},${feature.x}`;
         return `https://www.google.com/maps/dir/Current+Location/${dest}`;
+      },
+
+      editBrewery(){
+        // this.$router.push(`/brewery/${this.feature.properties.id}`);
+        this.$router.push({
+          name: 'editableBreweryInfo',
+          params: {
+            brewery_id: this.feature.properties.id
+          }
+        });
       },
 
       async fetchBeers(id){

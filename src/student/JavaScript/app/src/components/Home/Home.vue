@@ -21,10 +21,17 @@
     </sidebar>
 
     <!-- MAP VIEW-->
-    <map-view ref="mapView" 
-      @brewery-identified="showBreweryInfo"
-      @toggle-identify="identifyActivePanel"
-      @toggle-menu="menuActivePanel"/>
+    <map-view
+            ref="mapView"
+            :userIsAuthenticated="userIsAuthenticated"
+            @clicked-add-brewery="handleAddBrewery"
+            @new-brewery-point="createNewBrewery"
+            @add-brewery-cancelled="deactivateAddBrewery"
+            @toggle-identify="identifyActivePanel"
+            @cleared-selection="clearSelection"
+            @brewery-identified="showBreweryInfo"
+            @toggle-menu="menuActivePanel">
+    </map-view>
 
     
   </div>
@@ -35,6 +42,10 @@
   import Sidebar from './Sidebar';
   import BreweryInfo from './BreweryInfo';
   import Typeahead from './Typeahead';
+  import swal from 'sweetalert2';
+  import api from '../../modules/api';
+  import  { EventBus } from '../../modules/EventBus';
+  import enums from '../../modules/enums';
 
   export default {
     name: "home",
@@ -60,6 +71,27 @@
     mounted(){
       console.log('MOUNTED HOME COMPONENT!');
       console.log('ref to map view: ', this.$refs.mapView);
+
+      // need to manually update this, because feature returned from map click is not
+      // the original object
+      EventBus.$on('brewery-changed', async (obj)=>{
+        console.log('brewery-change! ', obj)
+
+        if (this.selectedBrewery && obj.id === this.selectedBrewery.properties.id){
+          if (obj.type === 'delete'){
+            this.clearSelection();
+          } else {
+            const resp = await api.getBrewery(obj.id, { f: 'geojson' });
+            if (resp.features.length){
+              // update brewery
+              Object.assign(this.selectedBrewery, resp.features[0]);
+            }
+          }
+        }
+        if (obj.type === 'create'){
+          this.deactivateAddBrewery();
+        }
+      });
     },
 
     methods: {
@@ -105,12 +137,102 @@
           this.$refs.sidebar.toggle();
         }
       },
+      handleAddBrewery(){
+        this.addBreweryActive = true;
+        this.activateButton('.add-brewery');
+      },
+
+      deactivateAddBrewery(){
+        const btn = document.querySelector('.add-brewery');
+        btn ? btn.classList.remove('control-btn-active'): null;
+        this.addBreweryActive = false;
+        this.$refs.mapView.deactivateAddBrewery();
+      },
+
+
+      async createNewBrewery(point){
+
+        swal({
+          title: 'Create New Brewery',
+          input: 'text',
+          showCancelButton: true,
+          confirmButtonText: 'Create',
+          confirmButtonColor: 'forestgreen',
+          showLoaderOnConfirm: true,
+          allowOutsideClick: ()=> !swal.isLoading(),
+          preConfirm: async (name)=> {
+            const lat = point.lat;
+            const lng = point.lng;
+
+            // fetch access token from root vue instance "config" prop
+            const accessToken = this.$root.config.map.accessToken;
+            const params = await api.maboxReverseGeocode(lat, lng, accessToken);
+
+            // add x,y coords
+            params.x = point.lng;
+            params.y = point.lat;
+
+            // add brewery name to params and create new brewery
+            params.name = name;
+            const resp = await api.createItem('breweries', params);
+
+            // notify new brewery has been created
+            EventBus.$emit('brewery-change', {
+              id: resp.id,
+              type: 'create'
+            });
+
+            this.deactivateAddBrewery();
+            return resp;
+          }
+        }).then((res)=> {
+          const newBreweryId = res.value.id;
+          this.emitBreweryChange(newBreweryId, 'create');
+          swal({
+            title: 'Success',
+            text: 'successfully created new brewery',
+            confirmButtonText: 'Go To New Brewery',
+            cancelButtonText: 'Stay Here',
+            showCancelButton: true
+          }).then((res)=>{
+            res.value ? this.goToEditBrewery(newBreweryId): null;
+          });
+
+        }).catch(err =>{
+          console.log('error creating brewery: ', err);
+          swal({
+            type: 'error',
+            title: 'Unable to Create Brewery',
+            text: "please make sure you're logged in to make this change"
+          })
+        });
+
+      },
+
+      goToEditBrewery(id){
+
+        // // small timeout to prevent race conditions
+        // setTimeout(()=>{
+          this.$router.push({ name: 'editableBreweryInfo', params: { brewery_id: id }})
+        // }, 250)
+      },
+
+      emitBreweryChange(id, type){
+        EventBus.$emit('brewery-changed', {
+          id: id,
+          type: type
+        })
+      },
 
       // Below methods are not what we normally do in Vue.js, things are done 
       // with vanilla js to interact with elements within the Mapboxgl canvas container
       handleExpand(expanded){
         // listen for sidebar to open and update move map's left position
-        document.querySelector('#map').style.left = `${expanded ? 350: 0}px`;
+        const map = document.querySelector('#map');
+        if (map){
+          map.style.left = `${expanded ? 350: 0}px`;
+        }
+        
         if (!expanded){
           this.clearActiveButtons();
         } else {
@@ -157,6 +279,11 @@
         if (newVal){
           this.activateButton('.expand-identify');
         }
+      },
+
+      '$root.userIsAuthenticated'(newVal){
+        console.log('user is authenticated changed: ', newVal)
+        this.userIsAuthenticated = newVal;
       }
     }
   }

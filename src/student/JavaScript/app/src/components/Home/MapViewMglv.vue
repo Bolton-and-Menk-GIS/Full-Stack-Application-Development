@@ -42,7 +42,9 @@
       return {
         map: null,
         selectionMarker: null,
-        state: 'default'
+        state: 'default',
+        canvas: null,
+        addBreweryButton: null,
       }
     },
     mounted(){
@@ -52,12 +54,49 @@
        EventBus.$on('brewery-search-result', (feature)=>{
         this.handleIdentify(feature, true);
       });
+
+      // update the brewery source when breweries have changed
+      EventBus.$on('brewery-changed', async (obj)=>{
+        console.log('brewery changed from map component: ', obj);
+        this.map.getSource('breweries').setData(await api.getBreweries());
+      });
     },
 
     methods: {
       mapInitialized(map){
         console.log('map initialized: ', map);
         this.map = map;
+      },
+
+      createAddBreweryButton(){
+        const addButton = createControlButton({
+          className: 'add-brewery',
+          iconClass: 'fas fa-plus',
+          onClick: this.addNewBrewery,
+          title: 'add new brewery'
+        });
+
+        this.map.addControl(addButton, 'top-left');
+        this.addBreweryButton = addButton;
+      },
+
+      deactivateAddBrewery(){
+        this.state = 'default';
+        this.canvas ? this.canvas.style.cursor = 'grab': null;
+      },
+
+      addNewBrewery(){
+        console.log('clicked add new brewery!');
+        if (this.state === 'adding'){
+          this.deactivateAddBrewery();
+          this.$emit('add-brewery-cancelled');
+          return;
+        }
+        this.$emit('clicked-add-brewery');
+        // set cursor to crosshair temporarily
+        this.canvas = document.querySelector('.mapboxgl-canvas-container');
+        this.canvas.style.cursor = 'crosshair';
+        this.state = 'adding';
       },
 
       async mapLoaded(map){
@@ -119,27 +158,33 @@
         
       },
 
-      mapClick(map, e) {
+      mapClick(map, e){
         console.log('map click: ', e);
 
         // find features
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: ['breweries']
-        });
+        if (this.state === 'default'){
+          const features = map.queryRenderedFeatures(e.point, {
+            layers: ['breweries']
+          });
 
-        console.log('found features: ', features);
-        if (features.length) {
-          // handle selection on map
-          const feature = features[0];
-          this.handleIdentify(feature);
-        } else if (this.selectionMarker) {
-          // clear selection on map and close identify
-          this.selectionMarker.remove();
-          this.selectionMarker = null;
-          this.$emit('cleared-selection')
+          console.log('found features: ', features);
+          if (features.length){
+
+            // handle selection on map
+            const feature = features[0];
+            this.handleIdentify(feature);
+          } else if (this.selectionMarker){
+
+            // clear selection on map and close identify
+            this.selectionMarker.remove();
+            this.selectionMarker = null;
+            this.$emit('cleared-selection')
+          }
+        } else {
+          this.$emit('new-brewery-point', e.lngLat);
         }
-
       },
+
 
       handleIdentify(feature, updateCenter=false){
         if (!feature){
@@ -162,6 +207,21 @@
         }
       }
 
+    },
+
+    watch: {
+      '$root.userIsAuthenticated'(newVal){
+        if (newVal) {
+          if (!this.addBreweryButton){
+            this.createAddBreweryButton()
+          }
+        } else {
+          if (this.addBreweryButton){
+            this.map.removeControl(this.addBreweryButton);
+            this.addBreweryButton = null;
+          }
+        }
+      }
     }
   }
 </script>

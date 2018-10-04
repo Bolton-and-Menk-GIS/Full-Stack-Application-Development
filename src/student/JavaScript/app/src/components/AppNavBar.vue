@@ -1,5 +1,8 @@
 <template>
   <b-navbar toggleable="md" type="dark" class="theme-banner app-header" :sticky="true">
+    <span class="back mr-3" title="go back" @click="$router.back()" v-if="backEnabled">
+      <font-awesome-icon prefix="fas" icon="arrow-circle-left"/>
+    </span>
     <b-navbar-brand href="#"><strong>Brewery Finder</strong></b-navbar-brand>
 
     <b-navbar-nav class="ml-auto">
@@ -60,6 +63,7 @@
         showLoginModal: false,
         userLoggedIn: false,
         showLogout: false,
+        backEnabled: false
       }
     },
     async mounted(){
@@ -108,10 +112,25 @@
       },
 
     },
+
+    watch: {
+      $route(to, from){
+        // console.log('app navbar route: ', to, from);
+        // watch the router to see if one of these routes are active, if so we want to add a back button
+        this.backEnabled = ['editableBreweryInfo', 'editableBeerInfo'].includes(to.name);
+      }
+    }
   }
 </script>
 
 <style scoped>
+
+  .back {
+    font-size: 1.75rem;
+    color: white;
+    cursor: pointer;
+  }
+  
   .logout-container {
     margin: auto;
     margin-top: 2rem;

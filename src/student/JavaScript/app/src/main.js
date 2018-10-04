@@ -10,6 +10,7 @@ import '@fortawesome/fontawesome-free/js/all';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Spinner from './components/UI/Spinner';
 import Vuelidate from 'vuelidate';
+import { EventBus } from './modules/EventBus';
 
 // use Bootstrap-Vue and Vuelidate
 Vue.use(BootstrapVue);
@@ -39,12 +40,24 @@ request('./config.json').then((config) => {
     // mounted event
     mounted(){
       console.log('MOUNTED MAIN VUE INSTANCE');
+
+      // listen for user login/logout events
+      EventBus.$on('user-logged-in', ()=>{
+        this.userIsAuthenticated = true;
+        console.log('user logged in main.js')
+        // this.$refs.mapView.createAddBreweryButton();
+      });
+
+      EventBus.$on('user-logged-out', ()=>{
+        this.userIsAuthenticated = false;
+      });
     },
 
     // data must be a function that returns an object
     data(){
       return {
-        config: config
+        config: config,
+        userIsAuthenticated: false
       }
     }
   }).$mount('#app');

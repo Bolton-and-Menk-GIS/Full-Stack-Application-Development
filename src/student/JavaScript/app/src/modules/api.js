@@ -1,5 +1,6 @@
 import { request } from './xhr';
 import axios from 'axios';
+import enums from './enums';
 
 const api = {
 

@@ -90,9 +90,12 @@
 
 <script>
   import api from '../../modules/api';
+  import BeerPreview from './BeerPreview';
+  import enums from '../../modules/enums';
+  import Accordion from '../UI/Accordion';
   import DropZone from '../UI/DropZone';
-  import swal from 'sweetalert2';
   import { EventBus } from "../../modules/EventBus";
+  import swal from 'sweetalert2';
 
   export default {
     name: "beer-info",
