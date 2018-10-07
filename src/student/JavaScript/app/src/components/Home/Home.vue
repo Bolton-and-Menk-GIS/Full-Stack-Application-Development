@@ -210,11 +210,8 @@
       },
 
       goToEditBrewery(id){
-
-        // // small timeout to prevent race conditions
-        // setTimeout(()=>{
-          this.$router.push({ name: 'editableBreweryInfo', params: { brewery_id: id }})
-        // }, 250)
+        // open editable brewery page and pass in the brewery id
+        this.$router.push({ name: 'editableBreweryInfo', params: { brewery_id: id }})
       },
 
       emitBreweryChange(id, type){
@@ -282,7 +279,6 @@
       },
 
       '$root.userIsAuthenticated'(newVal){
-        console.log('user is authenticated changed: ', newVal)
         this.userIsAuthenticated = newVal;
       }
     }

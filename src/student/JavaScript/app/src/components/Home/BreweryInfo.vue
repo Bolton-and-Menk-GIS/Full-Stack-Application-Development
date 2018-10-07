@@ -69,6 +69,14 @@
 
       // load the beers
       this.fetchBeers()
+
+      // notify this component to reload featured beers
+      EventBus.$on('beers-changed', (obj)=>{
+        console.log('beers-changed event received: ', obj);
+        if (obj.brewery_id == this.properties.id){
+          this.fetchBeers();
+        }
+      });
       
     },
 

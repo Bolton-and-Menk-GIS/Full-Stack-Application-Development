@@ -378,8 +378,9 @@
       },
 
       emitBeerChange(id, type){
+        console.log('emitting beers-changed: ', this.brewery.id);
         EventBus.$emit('beers-changed', {
-          brewery_id: this.brewery_id,
+          brewery_id: this.brewery.id,
           beer_id: id,
           type: type
         });

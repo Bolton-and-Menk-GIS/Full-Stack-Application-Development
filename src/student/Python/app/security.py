@@ -134,8 +134,9 @@ def create_user():
             raise SendAuthenticationEmailFailed
 
         return success('successfully created user: {}'.format(args.get('username')), activation_url=activation_url.format(id=user.id))
-    except:
-        raise CreateUserError
+    except Exception as e:
+        return dynamic_error(description=str(e), message=e.args)
+        # raise CreateUserError
 
 @security_api.route('/users/<id>/activate', methods=['POST'])
 def activate_user(id):

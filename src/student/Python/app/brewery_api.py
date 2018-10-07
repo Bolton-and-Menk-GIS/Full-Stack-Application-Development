@@ -241,6 +241,21 @@ def delete_item(tablename, id):
         if not obj:
             raise InvalidResource
         oid = obj.id
+
+        # before deleting check if it is a beer or beer photo, if so
+        # remove photo too if the storage type is filesystem
+        photo_names = []
+        if tablename == 'beers':
+            photo_names.extend([p.photo_name for p in obj.photos])
+        elif tablename == 'beer_photos':
+            photo_names.append(obj.photo_name)
+        for photo_name in photo_names:
+            try:
+                os.remove(os.path.join(upload_folder, photo_name))
+            except:
+                pass
+
+        # delete the actual record
         delete_object(obj)
         session.commit()
         return success('Successfully deleted item in "{}"'.format(tablename), id=oid)

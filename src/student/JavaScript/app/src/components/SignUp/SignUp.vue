@@ -45,7 +45,7 @@
           <b-form-invalid-feedback id="retypeFeedback">Passwords do not match</b-form-invalid-feedback>
         </b-form-group>
 
-        <b-btn class="theme mt-2" :disabled="!formIsValid">Sign Up</b-btn>
+        <b-btn class="theme mt-2" :disabled="!formIsValid" @click="submit">Sign Up</b-btn>
         <b-btn variant="danger mt-2 ml-4 bold" @click="$router.push({name: 'home'})">Cancel</b-btn>
       </b-form>
 
@@ -132,6 +132,7 @@
     methods: {
 
       async submit(){
+        console.log('submitted')
         this.state = 'loading';
         try {
           const resp = await api.createUser({
@@ -157,7 +158,7 @@
     computed: {
 
       invalidUsernameFeedback(){
-        return this.usernameTaken ? `"${this.username}" is already taken`: 'Username must be at least 5 characters';
+        return (this.username && !usernameNotTaken(this.username, this)) ? `"${this.username}" is already taken`: 'Username must be at least 5 characters';
       },
 
       activationUrl(){
