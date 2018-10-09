@@ -4,10 +4,13 @@
 
 The first thing we need to do to enable editing on the client side is add the appropriate API methods.  Open the `api.js` file inside the `modules` folder.  Add the following methods:
 
-import enums
+first import the `enums` module:
+
 ```js
 import enums from './enums';
 ```
+
+and these methods:
 
 ```js
 getBeer(id, options={}){
@@ -234,7 +237,11 @@ The template when rendered will look like the following:
 
 ![editable beer](images/app_images/editable_brewery1.PNG)
 
-There is not a whole lot of magic involved in the above template, it is mostly just standard form inputs that we will add and display using the `Bootstrap-Vue` components and the [bootstrap grid system](https://bootstrap-vue.js.org/docs/components/layout/)
+There is not a whole lot of magic involved in the above template, it is mostly just standard form inputs that we will add and display using the `Bootstrap-Vue` components and the [bootstrap grid system](https://bootstrap-vue.js.org/docs/components/layout/). 
+
+For most of the rows, for small devices the input will take up the entire screen while taking up half on larger devices.  We are splitting the rows in the middle for the weekday hours and description.  A `v-for` directive is also used to create all the weekday fields.  Under the form, there are two buttons to Delete the Brewery as well as a button to Save the Changes.
+
+Next, add the `<script>` tag:
 
 ```html
 <script>
@@ -933,6 +940,17 @@ const routes = [
 ];
 ```
 
+### add event handler in BreweryInfo.vue `mounted` to listen for new beers:
+
+```js
+// notify this component to reload featured beers
+EventBus.$on('beers-changed', (obj)=>{
+  if (obj.brewery_id == this.properties.id){
+    this.fetchBeers();
+  }
+});
+```
+
 ### navigation back button
 
 ```html
@@ -1220,4 +1238,8 @@ update `mounted` of home
             @toggle-menu="menuActivePanel">
     </map-view>
 ```
+
+ 
+
+
 
