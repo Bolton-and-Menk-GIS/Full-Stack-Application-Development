@@ -121,8 +121,10 @@
     watch: {
       'properties.id'(newVal){
         // make sure to fetch beers each time a new brewery is identified
-        this.featuredBeers.length = 0;
-        this.fetchBeers(newVal);
+        this.featuredBeers = [];
+        if (newVal){
+          this.fetchBeers(newVal);
+        }
       }
     }
   }

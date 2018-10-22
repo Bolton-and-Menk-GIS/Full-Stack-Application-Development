@@ -82,7 +82,10 @@
 
       deactivateAddBrewery(){
         this.state = 'default';
-        this.canvas ? this.canvas.style.cursor = 'grab': null;
+        if (this.canvas){
+          this.canvas.style.cursor = 'grab'; 
+          this.canvas.title = '';
+        }
       },
 
       addNewBrewery(){
@@ -96,6 +99,7 @@
         // set cursor to crosshair temporarily
         this.canvas = document.querySelector('.mapboxgl-canvas-container');
         this.canvas.style.cursor = 'crosshair';
+        this.canvas.title = 'click on map location to place a new brewery'
         this.state = 'adding';
       },
 

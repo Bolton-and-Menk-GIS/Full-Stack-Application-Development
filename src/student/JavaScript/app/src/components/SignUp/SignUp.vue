@@ -87,6 +87,7 @@
     
     async beforeMount(){
       this.usernames = await api.fetchUsernames();
+      console.log('VALIDATION: ', this, this.validations, this.$v)
     },
 
     data(){
