@@ -57,7 +57,7 @@ def clean_filename(path):
     fn = re.sub('[^A-Za-z0-9]+', '_', basename).replace('__', '_')
     return os.path.join(os.path.dirname(path), fn + ext)
 
-def success(msg, **kwargs):
+def success(msg='success', **kwargs):
     """ returns a Response() object as JSON
 
     :param msg: message to send
@@ -161,24 +161,6 @@ def validate_fields(table, fields=None):
         fields = list_fields(table)
     return fields
 
-
-def to_json(results, fields=None):
-    """casts query results to json
-
-    :param results: query results
-    :param fields: list of field names to include
-    :return:
-    """
-    fields = validate_fields(results[0] if isinstance(results, list) and len(results) else results, fields)
-    if isinstance(results, list):
-        if len(results):
-            return [{f: getattr(r, f) for f in fields} for r in results]
-        else:
-            return []
-    else:
-        return {f: getattr(results, f) for f in fields}
-
-
 def query_wrapper(table, **kwargs):
     """
 
@@ -204,9 +186,25 @@ def query_wrapper(table, **kwargs):
         return session.query(table).filter(*conditions).all()
     else:
         return session.query(table).all()
+        
 
+def to_json(results, fields=None):
+    """casts query results to json
 
-def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
+    :param results: query results
+    :param fields: list of field names to include
+    :return:
+    """
+    fields = validate_fields(results[0] if isinstance(results, list) and len(results) else results, fields)
+    if isinstance(results, list):
+        if len(results):
+            return [{f: getattr(r, f) for f in fields} for r in results]
+        else:
+            return []
+    else:
+        return {f: getattr(results, f) for f in fields}
+
+def endpoint_query(table, fields=None, id=None, **kwargs):
     """ wrapper for for query endpoint that can query one feature by id
     or query all features via the query_wrapper
 
@@ -224,12 +222,9 @@ def endpoint_query(table, fields=None, id=None, as_response=True, **kwargs):
 
     # check for args and do query
     args = collect_args()
-    print('args: ', args)
     for k,v in six.iteritems(kwargs):
         args[k] = v
-    results = query_wrapper(table, **args)
-    return jsonify(to_json(results, fields)) if as_response else to_json(results, fields)
-
+    return jsonify(to_json(query_wrapper(table, **args), fields))
 
 # toGeoJson() handler for breweries
 def toGeoJson(d):
@@ -242,13 +237,7 @@ def toGeoJson(d):
         d = [d]
     return {
         "type": "FeatureCollection",
-        # "crs": {
-        #     "type": "name",
-        #     "properties": {
-        #         "name": "urn:ogc:def:crs:EPSG::3857"
-        #     }
-        # },
-       "features": [
+        "features": [
             {
                 "type": "Feature",
                 "properties": f,
@@ -259,6 +248,41 @@ def toGeoJson(d):
             } for f in d
         ]
     }
+
+
+def export_data(table, fields=None, format='csv', **kwargs):
+    """ exports table to csv or shapefile (latter only supported with breweries table)
+
+    :param table: table to export
+    :param fields: fields to include in export
+    :param format: export type, defaults to csv (csv|shapefile)
+    :param kwargs: filter parameters
+    :return: download file, will be either a .csv file or .zip
+    """
+    # cleanup download directory by deleting files older than 30 minutes
+    remove_files(download_folder, minutes=30)
+
+    # get fields
+    fields = validate_fields(table, fields)
+
+    # allow shapefile export if table selected is breweries
+    if format.lower() == 'shapefile' and table.__tablename__ == 'breweries':
+        return export_to_shapefile(table, fields, **kwargs)
+
+    else:
+        # export data as csv
+        results = to_json(query_wrapper(table, fields=fields, **kwargs), fields)
+
+        # write csv file
+        csvFilePath = os.path.join(download_folder, '{}.csv'.format(get_timestamp(table.__tablename__)))
+
+        with open(csvFilePath, 'wb') as csvFile:
+            writer = csv.DictWriter(csvFile, fields)
+            writer.writeheader()
+            for result in results:
+                writer.writerow(result)
+
+        return csvFilePath
 
 
 def export_to_shapefile(table, fields=None, **kwargs):
@@ -340,41 +364,6 @@ def export_to_shapefile(table, fields=None, **kwargs):
     return folder + '.zip'
 
 
-def export_data(table, fields=None, format='csv', **kwargs):
-    """ exports table to csv or shapefile (latter only supported with breweries table)
-
-    :param table: table to export
-    :param fields: fields to include in export
-    :param format: export type, defaults to csv (csv|shapefile)
-    :param kwargs: filter parameters
-    :return: download file, will be either a .csv file or .zip
-    """
-    # cleanup download directory by deleting files older than 30 minutes
-    remove_files(download_folder, minutes=30)
-
-    # get fields
-    fields = validate_fields(table, fields)
-
-    # allow shapefile export if table selected is breweries
-    if format.lower() == 'shapefile' and table.__tablename__ == 'breweries':
-        return export_to_shapefile(table, fields, **kwargs)
-
-    else:
-        # export data as csv
-        results = to_json(query_wrapper(table, fields=fields, **kwargs), fields)
-
-        # write csv file
-        csvFilePath = os.path.join(download_folder, '{}.csv'.format(get_timestamp(table.__tablename__)))
-
-        with open(csvFilePath, 'wb') as csvFile:
-            writer = csv.DictWriter(csvFile, fields)
-            writer.writeheader()
-            for result in results:
-                writer.writerow(result)
-
-        return csvFilePath
-
-
 def remove_files(path, exclude=[], older_than=True, test=False, subdirs=False, pattern='*', **kwargs):
     """ removes old folders within a datetime.timedelta from now
 
@@ -430,7 +419,6 @@ def remove_files(path, exclude=[], older_than=True, test=False, subdirs=False, p
                     else:
                         print('excluded: "{0}"'.format(os.path.join(root, f)))
                 else:
-
                     print('skipped file: "{0}"'.format(os.path.join(root, f)))
         else:
             print('excluded files in: "{0}"'.format(root))
@@ -454,6 +442,7 @@ def get_object(table, **kwargs):
     except:
         return None
 
+
 def create_object(table, **kwargs):
     """ creates a new record in the table
 
@@ -462,6 +451,7 @@ def create_object(table, **kwargs):
     :return: newly created table object
     """
     return table(**kwargs)
+
 
 def update_object(obj, **kwargs):
     """ creates a new record in the table
@@ -474,6 +464,7 @@ def update_object(obj, **kwargs):
         setattr(obj, k, v)
     return obj
 
+
 def delete_object(obj):
     """ deletes a single object from table
 
@@ -483,4 +474,3 @@ def delete_object(obj):
     oid = obj.id
     obj.delete() if hasattr(obj, 'delete') else session.delete(obj)
     return oid
-
