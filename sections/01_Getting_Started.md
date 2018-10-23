@@ -16,16 +16,19 @@
     - Call it `Brewery API`
     - Add the following (key, value) pairs:
 		
-| key  | value |
-| ------------- | ------------- |
-| host  | localhost  |
-| port  | 5001  | 
-| auth | <leave blank, we will fill this out later> |
+        | key  | value |
+        | ------------- | ------------- |
+        | host  | localhost  |
+        | port  | 5001  | 
+        | email | <add your email address here> |
+        | auth | <leave blank, we will fill this out later> |
 
 3. import the API tests from the `/student/API_Tests/Brewery_API.postman_collection.json` file
     * this will load all the API tests for the REST API (note: the tests will not work until the routes are created!)
 
 #### test the Flask app
+*Note: make sure you have Python's [`virtualenv`](https://virtualenv.pypa.io/en/stable/installation/) installed before doing this part!*
+
 1. Before we can launch our flask REST API (app), we need to make sure the dependencies required are available.  For your convenience, I have provided a shell script to create a `virtualenv` and install the necessary modules for windows users. Find the `setup_venv.sh` file inside the `student/Python` folder and double click to run.
     * If using a mac, skip this step as there is a `virtualenv` called `mac_venv` inside the `app` folder.  (note: the script may not work for everyone, if you're having issues visit the [Setting up the virtualenv manually]() page).   
 
@@ -246,7 +249,7 @@ Once the dev server has started, launch Chrome and navigate to the location show
 
 Also, be sure to launch the Chrome Developer tools (`F12`, `Ctrl + Shift + I`, or right click > inspect).  You should see the following console logs:
 
-1[console](images/sec_01/console_mounted.PNG)
+![console](images/sec_01/console_mounted.PNG)
 
 Pay close attention to the order of the console logs.  The first thing loaded/mounted is the `App.vue` and then anything that it contains is loaded after (Map View, followed by Home) with the Vue instance mounting last.  The map loaded event will probably be the last log because that does the start up of `Mapbox-gl` which also has to load in tiles.  Right now the application doesn't really do anything other than display a map.  
 
@@ -254,7 +257,7 @@ However, because we did implement the `PageNotFound` route to catch any unmatche
 
 ![not found](images/app_images/page_not_found.PNG)
 
-Now that the basic front end application is running and we have a working back end API as well, let's start building the fun stuff!  Feel free to move on to [Section 2](https://github.com/Bolton-and-Menk-GIS/Full-Stack-Application-Development/blob/master/sections/02_Serve_Brewery_Data.md) now.
+Now that the basic front end application is running and we have a working back end API as well, let's start building the fun stuff!  Feel free to move on to [Section 2](02_Serve_Brewery_Data.md) now.
 
 
 

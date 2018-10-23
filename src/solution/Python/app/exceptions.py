@@ -41,6 +41,11 @@ class CreateUserError(HTTPException):
     description = 'Create User Error'
     message = 'Unable to create user, please check the input parameters and try again'
 
+class SendAuthenticationEmailFailed(HTTPException):
+    code = 499
+    description = 'Send Authentication Email Failed'
+    message = 'Failed to the send authentication email'
+
 
 class UserNotFound(HTTPException):
     code = 465
