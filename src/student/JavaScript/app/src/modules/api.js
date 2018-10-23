@@ -13,6 +13,9 @@ const api = {
   },
 
   getBeersFromBrewery(breweryId, options={}){
+    if (!breweryId){
+      return Promise.resolve([]);
+    }
     return request(`/breweries/${breweryId}/beers`, options);
   },
 
