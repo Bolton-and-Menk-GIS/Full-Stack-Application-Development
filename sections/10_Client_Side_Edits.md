@@ -1510,7 +1510,7 @@ And then a success message should appear:
 
 ![are you sure](images/sec_10/delete_brewery.PNG)
 
-Now that the application is complete, the next optional step is to build for production and deploy it to a webserver.  Please move on to the [next section](11_Build_For_Production) to see how to build for production.
+Now that the application is complete, the next optional step is to build for production and deploy it to a webserver.  Please move on to the [next section](11_Build_For_Production.md) to see how to build for production.
 
 
 

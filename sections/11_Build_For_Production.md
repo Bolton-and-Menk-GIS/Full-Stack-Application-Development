@@ -185,11 +185,11 @@ Set the following:
 
 It should look similar to the following:
 
-![click handler mappings]](images/sec_11/click_handler_mappings.PNG)
+![click handler mappings](images/sec_11/click_handler_mappings.PNG)
 
 Before closing, Click `Request Restrictions`. Make sure *Invoke handler only if request is mapped to:* checkbox is unchecked:
 
-![click handler mappings]](images/sec_11/request_restrictions.PNG)
+![click handler mappings](images/sec_11/request_restrictions.PNG)
 
 #### Optional - add HTTPS bindings
 
@@ -199,31 +199,31 @@ When we set up the site, I set HTTP bindings to port `5022`, but you can also se
 
 At this point everything has been configured for our Flask app.  To make sure everything is working, make sure the site is selected in IIS and choose `Browse *:<port>` from the right menu.  That should open up a new tab in the default browser to our REST API at whatever port you specified:
 
-![browse to site]](images/sec_11/browse.PNG)
+![browse to site](images/sec_11/browse.PNG)
 
 The above shows that it is running on this machine (hence `localhost`).  However, to make sure it is available to your network or even outside, the specified port(s) need to be opened in the Firewall.  Open the `Windows Firewall with Advanced Security on Local Computer` from the computer's search bar.  Click on the `Inbound Rules` in the left pane and then choose `New Rule` from the right menu to create a new Inbound Rule.  For the Rule type, choose `Port`:
 
-![inbound rule type]](images/sec_11/rule_type.PNG)
+![inbound rule type](images/sec_11/rule_type.PNG)
 
 Hit next.  Make sure the rule applys to`TCP` protocol and set `Specify local ports`.  Here you can choose one specific port if you only set up HTTP bindings, or a range if you also allowed HTTPS.  You can also specify a larger range if you want to add other flask apps in the future and have them all be ran from ports 5000 through 5010.  Since I enabled both HTTP and HTTPS on ports `5022` and `5023` respectively, I am setting a range of `5022-5023`
 
-![port range]](images/sec_11/port_range.PNG)
+![port range](images/sec_11/port_range.PNG)
 
 On the `Action` page, make sure to `Allow the connection`:
 
-![action type]](images/sec_11/action.PNG)
+![action type](images/sec_11/action.PNG)
 
 Hit Next.  Leave the `Profile` page as is and hit Next again.
 
-![profile]](images/sec_11/profile.PNG)
+![profile](images/sec_11/profile.PNG)
 
 Finally, give the Inbound Rule a name and optionally a description and hit Finish:
 
-![rule name]](images/sec_11/rule_name.PNG)
+![rule name](images/sec_11/rule_name.PNG)
 
 That is all!  Now test the service from another machine using the proper domain, something like `http://gis.yourcompany.com:5022/`:
 
-![external test]](images/sec_11/external_test.PNG)
+![external test](images/sec_11/external_test.PNG)
 
 ### tell production app to reference production Flask Service
 
@@ -233,7 +233,7 @@ Now launch the production application again and make sure everything is working.
 
 Congratulations!  We just created a Full Stack application from start to finish and even deployed it to a production environment!
 
-![great success]](images/sec_11/great-success.gif)
+![great success](images/sec_11/great-success.gif)
 
 
 
