@@ -1,17 +1,11 @@
 from base import FlaskExtension
-from flask import jsonify
-import os
-import zipfile
-from brewery_api import brewery_api
-from security import security_api, userStore, unauthorized_callback
-from flask_login import LoginManager, login_required
-import shapefile
-import shutil
-import glob
+from flask import Flask, jsonify
 from utils import *
-from models import session
+from security import security_api, userStore, unauthorized_callback
+from brewery_api import brewery_api
+from flask_login import LoginManager
+from .exceptions import *
 from datetime import timedelta
-from exceptions import *
 
 # load config
 config = load_config()
@@ -27,7 +21,15 @@ if not os.path.exists(upload_folder) and photo_storage == 'filesystem':
 
 # init app inherited from our base.FlaskExtension object
 app_name = os.path.basename(__file__).split('.')[0]
-app = FlaskExtension(app_name, static_folder=download_folder)
+app = Flask(app_name, static_folder=download_folder)
+
+# pass it through our app extension to register error handlers
+FlaskExtension(app)
+
+# register flask-login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.unauthorized_handler(unauthorized_callback)
 
 # set secret key and cookie name for flask-login
 app.config['SECRET_KEY'] = 'beer-app'
@@ -36,23 +38,14 @@ app.config['REMEMBER_COOKIE_NAME'] = 'beer_app_token'
 # uploads folder for beer images
 app.config['UPLOAD_FOLDER'] = upload_folder
 
-
-# register flask-login manager
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.unauthorized_handler(unauthorized_callback)
-
 # register blueprints to get functionality from brewery and security api's
 app.register_blueprint(security_api)
 app.register_blueprint(brewery_api)
-
-
 
 # callback to reload the user object for flask-login
 @login_manager.user_loader
 def load_user(userid):
     return userStore.get_user(id=userid)
-
 
 @login_manager.request_loader
 def load_user_from_request(request):
@@ -83,6 +76,6 @@ def load_user_from_request(request):
 def hello():
     return jsonify({'message': 'welcome to the brewery api!'})
 
-@app.route('/test')
+@app.route('/test', methods=['GET', 'POST'])
 def test():
     return jsonify(collect_args())
