@@ -73,6 +73,9 @@ Before we can use the new endpoint we just created to render the *Featured Beers
 
 ```js
   getBeersFromBrewery(breweryId, options={}){
+    if (!breweryId){
+      return Promise.resolve([]);
+    }
     return request(`/breweries/${breweryId}/beers`, options);
   },
  ```
