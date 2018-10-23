@@ -68,4 +68,7 @@ echo "installed munch"
 pip install git+https://github.com/GeospatialPython/pyshp.git
 echo "installed shapefile"
 
+pip install wfastcgi
+echo "installed wfastcgi"
+
 read -p "finished installing dependencies, hit any key to exit..."
