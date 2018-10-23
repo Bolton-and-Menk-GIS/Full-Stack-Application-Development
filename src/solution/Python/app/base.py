@@ -1,20 +1,19 @@
 from flask import Flask, jsonify, url_for
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import default_exceptions, HTTPException
 import urllib
+from functools import wraps
 from . import exceptions
 from utils import *
-import time
 import types
 
 # get all exceptions from our module
 exceptionFilter = lambda c: isinstance(c, (type, types.ClassType)) and issubclass(c, HTTPException)
 app_exceptions = filter(exceptionFilter, [getattr(exceptions, e) for e in dir(exceptions)])
 exception_lookup = {e.code: e for e in app_exceptions}
+exception_names = [e.name for e in app_exceptions]
 
-
-
-__all__ = ('FlaskExtension', 'collect_args', 'jsonify')
+__all__ = ('FlaskExtension', 'JSONExceptionHandler', 'errorHandler')
 
 # handlers for json exceptions
 HANDLERS = [(exc, json_exception_handler) for exc in app_exceptions]
@@ -40,27 +39,27 @@ class JSONExceptionHandler(object):
     def register(self, exception_or_code, handler=None):
         self.app.errorhandler(exception_or_code)(handler or self.std_handler)
 
-class FlaskExtension(Flask):  # inherit from Flask object
+class FlaskExtension(object): 
 
-    def __init__(self, name, *args, **kwargs):
-
-        # call super class
-        super(self.__class__, self).__init__(name, *args, **kwargs)
+    def __init__(self, app):
+        
+        # create attribute for flask app
+        self.app = app
 
         # wrap in CORS for cross origin sharing
-        self.cors = CORS(self)
-        self.config['CORS_HEADERS'] = 'Content-Type'
+        self.app.cors = CORS(self.app)
+        self.app.config['CORS_HEADERS'] = 'Content-Type'
 
         # register error handlers
-        self.handler = JSONExceptionHandler(self)
+        self.app.handler = JSONExceptionHandler(self.app)
         for ex, h in HANDLERS:
-            self.handler.register(ex, h)
+            self.app.handler.register(ex, h)
 
         # lookup for all endpoints
-        @self.route('/endpoints', methods=['GET', 'POST'])
+        @self.app.route('/endpoints', methods=['GET', 'POST'])
         def endpoints():
             output = []
-            for rule in self.url_map.iter_rules():
+            for rule in self.app.url_map.iter_rules():
 
                 options = {}
                 for arg in rule.arguments:
@@ -72,10 +71,26 @@ class FlaskExtension(Flask):  # inherit from Flask object
             return jsonify({'endpoints': sorted(output, key=lambda d: d.get('url'))})
 
         # preview exceptions by passing in error code
-        @self.route('/tests/exceptions/<int:code>')
+        @errorHandler
+        @self.app.route('/tests/exceptions/<code>')
         def testException(code):
             raise exception_lookup.get(code, InvalidResource)
 
-    @staticmethod
-    def get_timestamp():
-        return time.strftime('%Y%m%d%H%M%S')
+
+def errorHandler(f):
+    @wraps(f)  # functools.wraps
+    @cross_origin(origin='*')
+    def wrapped(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            if hasattr(e, 'name') and e.name in exception_names:
+                # can safely raise this as it's wrapped in a response
+                raise e
+            else:
+                return dynamic_error(
+                    name=e.name if hasattr(e, 'name') else e.__class__.__name__,
+                    description=e.message,
+                    message=e.args
+                )
+    return wrapped
