@@ -61,6 +61,8 @@ typings/
 .next
 
 # python exclude
+__pycache__/
+*.py[co]
 *.pyc
 
 # sqlite db folder

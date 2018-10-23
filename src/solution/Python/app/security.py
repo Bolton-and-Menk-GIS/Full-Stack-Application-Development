@@ -13,7 +13,7 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 
 # user fields to return (no others allowed for security purposes)
-user_fields = ['id', 'name', 'username', 'email', 'activated']
+user_fields = ['id', 'name', 'username', 'activated']
 
 # create blue print
 security_api = Blueprint('security_api', __name__)
@@ -101,9 +101,9 @@ def send_authentication_email(to_addr, msg):
 @security_api.route('/users/<id>')
 def get_users(id=None):
     args = collect_args()
-    fields = validate_fields(User, args.get('fields'))
-    fields = [f for f in fields if f in user_fields]
+    fields = [f for f in validate_fields(User, args.get('fields')) if f in user_fields]
     return endpoint_query(User, fields, id)
+
 
 @security_api.route('/users/create', methods=['POST'])
 def create_user():
@@ -112,17 +112,31 @@ def create_user():
     try:
         args['password'] = base64.b64decode(args.get('password'))
     except:
-        pass
-    activation_url = args.get('activation_url')
+        # in case not passed in as base64
+        args['password'] = args.get('password')
+    activation_url = args.get('activation_url', '')
     if 'activation_url' in args:
         del args['activation_url']
-    print(args)
-    # try:
-    user = userStore.create_user(**args)
-    # send_authentication_email(user.email, activation_msg.format(activation_url.format(id=user.id)))
-    return success('successfully created user: {}'.format(args.get('username')), activation_url=activation_url.format(id=user.id))
-    # except:
-    #     raise CreateUserError
+    
+    if args.get('username') in [f.name for f in userStore.users]:
+        raise UsernameAlreadyExists
+
+    try:
+        user = userStore.create_user(**args)
+        try:
+            send_authentication_email(user.email, activation_msg.format(activation_url.format(id=user.id)))
+        except SendAuthenticationEmailFailed:
+            # we want to delete the user if the authentication email fails as they won't be able to activate their account
+            user.delete()
+            session.commit()
+
+            # now raise the error
+            raise SendAuthenticationEmailFailed
+
+        return success('successfully created user: {}'.format(args.get('username')), activation_url=activation_url.format(id=user.id))
+    except Exception as e:
+        return dynamic_error(description=str(e), message=e.args)
+        # raise CreateUserError
 
 @security_api.route('/users/<id>/activate', methods=['POST'])
 def activate_user(id):
@@ -139,7 +153,10 @@ def activate_user(id):
 def login():
     args = collect_args()
     username = args.get('username')
-    password = base64.b64decode(args.get('password', ''))
+    try:
+        password = base64.b64decode(args.get('password', ''))
+    except:
+        password = args.get('password', '')
     remember_me = args.get('remember', False) in ('true', True)
     validatedUser = userStore.check_user(username, password)
     if validatedUser:
@@ -154,10 +171,6 @@ def login():
         return success('user logged in', token=validatedUser.token)
     raise InvalidCredentials
 
-@security_api.route('/users/welcome')
-@login_required
-def welcome():
-    return success('Welcome {}'.format(current_user.name))
 
 @security_api.route('/users/logout', methods=['POST'])
 @login_required
@@ -168,3 +181,10 @@ def logout():
     except Exception as e:
         raise UnauthorizedUser
     return success('successfully logged out')
+
+
+@security_api.route('/users/welcome')
+@login_required
+def welcome():
+    return success('Welcome {}'.format(current_user.name))
+
